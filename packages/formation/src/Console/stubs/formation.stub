@@ -1,0 +1,112 @@
+<?php
+
+namespace {{ namespace }};
+
+use App\Actions\Formation\Formation;
+use App\Actions\Formation\Form\Form;
+use App\Actions\Formation\Form\Tab;
+use App\Actions\Formation\Form\Card;
+use App\Actions\Formation\Form\Section;
+use App\Actions\Formation\Form\Column;
+use App\Actions\Formation\Form\Field;
+
+use App\Actions\Formation\Index\Index;
+use App\Actions\Formation\Index\Select;
+use App\Actions\Formation\Index\Export;
+use App\Actions\Formation\Index\Import;
+use App\Actions\Formation\Index\BulkEdit;
+use App\Actions\Formation\Index\Search;
+use App\Actions\Formation\Index\Filter;
+use App\Actions\Formation\Index\Guard;
+use App\Actions\Formation\Index\GroupBy;
+use App\Actions\Formation\Index\Action;
+use App\Actions\Formation\Index\ItemAction;
+use App\Actions\Formation\Index\Operation;
+use App\Actions\Formation\Index\IndexTab;
+
+use Illuminate\Support\Facades\Auth;
+
+class {{ class }}
+{
+    public static $model = '{{ namespacedModel }}';
+
+    public static function index(Object $object): Index
+    {
+        return Formation::createIndex('index', function (Index $index) use ($object) {
+            $index
+                ->select(function (Select $select) {
+                    $select->field('name')->sortable()->truncate()->wrap()->maxWidth()->highlight();
+                    $select->field('created_at')->sortable()->display('md');
+                })
+                ->export(function (Export $export) {
+                    $export->field('name');
+                    $export->field('created_at');
+                })
+                ->import(function (Import $import) {
+                    $import->chunkSize(2);
+                    $import->field('name');
+                })
+                ->bulkEdit(function (BulkEdit $bulkEdit) {
+                    $bulkEdit->chunkSize(10);
+                    $bulkEdit->field('name');
+                })
+                ->search(function (Search $search) {
+                    $search->field('name');
+                })
+                ->filter(function (Filter $filter) {
+                    $filter->text('name')->operator('like');
+                })
+                ->guard(function (Guard $guard) use ($object) {
+                    //$guard->field('organisation_id')->operator('=')->value(Auth::user()->organisation_id);
+                })
+                ->action(function (Action $action) {
+                    //$action->operation('create');
+                    //$action->operation('import');
+                    //$action->operation('bulkEdit');
+                    //$action->operation('move');
+                    //$action->operation('reorder');
+                    //$action->operation('export');
+                    //$action->operation('bulkDelete')->danger()->break();
+                })
+                ->itemAction(function (ItemAction $itemAction) {
+                    $itemAction->operation('show')->rowClickable();
+                    $itemAction->operation('edit');
+                    //$itemAction->operation('duplicate');
+                    $itemAction->operation('delete')->danger()->break()->group(function (Operation $operation) {
+                        $operation->rules([]);
+                    });
+                })
+                ->indexTab(function (IndexTab $indexTab) use ($object) {
+                })
+                ->paginate('simple'); //->paginate();
+        });
+    }
+
+    public static function form(Object $object): Form
+    {
+        return Formation::createForm('form', function (Form $form) use ($object) {
+            $tabCount = 0;
+            $form->create('tab')->group($object, $tabCount, function (Tab $tab) use ($object) {
+                $tab->create('details')->description('')->group(function (Card $card) use ($object) {
+                    $card->create('')->column(1)->group(function (Section $section) use ($object) {
+                        $section->create('')->span(1)->column(2)->group(function (Column $column) use ($object) {
+                            $column->text('name')->span(1)->autofocus()->group(function (Field $field) {
+                                $field->rules(['required','max:100']);
+                            });
+
+                            $column->file('attachment')->folderPath('merchant/food/')->span(1)->group(function (Field $field) {
+                                $field->rules(['mimes:jpeg,bmp,png,gif,svg,pdf', 'max:2048', 'required']);
+                            });
+                            
+                            if ($object->type === 'create') {
+                                $column->preset('created_by')->default(Auth::id());
+                            }
+
+                            $column->preset('updated_by')->default(Auth::id());
+                        });
+                    }); 
+                });
+            });
+        });
+    }
+}

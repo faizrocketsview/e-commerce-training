@@ -1,0 +1,340 @@
+# Laravel Access Control Guideline: Using Policies and Spatie Permissions
+
+## Document Metadata
+- **Title**: Policy Guideline - IT Department Guideline
+- **Prepared For**: Rocketsview Management Sdn. Bhd.
+- **Confidentiality**: Confidential
+- **Version**: 1.0
+- **Total Pages**: 21
+- **Analysis Note**: This documentation is a comprehensive analysis and reformatted version of the provided PDF. It includes all text content, transcribed code snippets from images/screenshots, and descriptions of visual elements (e.g., tables, diagrams, UI mocks). The guideline focuses on standardizing module access control in Laravel projects using Laravel Policies and the Spatie Laravel-Permission package. I've structured it with step-by-step instructions for implementation, incorporating all details from the PDF pages.
+
+## Overview
+Establishing a standardized approach to module access control in Laravel projects using Laravel Policy and Spatie Laravel-Permission package to ensure consistency, security, and maintainability across all projects within the organization.
+
+**Visual Element**: The overview page features a background image of a conference room with chairs and a table, emphasizing collaboration.
+
+## Problem Statements
+The PDF highlights four key issues with current practices:
+
+1. Inconsistent implementation of access control across different Laravel projects.
+2. Difficulty in managing and updating permissions due to the lack of a common structure.
+3. Challenges in ensuring that team members understand and adhere to the access control standards.
+4. Sometimes developers overlook implementing data restriction use cases in policy.
+
+**Visual Element**: Presented as four numbered circles in a grid layout for easy readability.
+
+## Objectives
+The guideline aims to address the problems through these objectives:
+
+1. To provide a clear and consistent framework for implementing access control using Laravel Policy and Spatie Laravel-Permission package.
+2. To standardize assignment of permissions, ensuring they are up-to-date and accurately reflect organizational requirements.
+3. To help team members learn and follow access control guidelines.
+4. To ensure developers consistently implement all necessary data restriction use cases.
+
+**Visual Element**: Listed in a dark background section for emphasis.
+
+## Scopes
+This guideline will cover the implementation and management of module access control in Laravel projects, including managing permissions, the use of Blade directives for UI components, and policy files for request and data restrictions.
+
+**Quick Tip from PDF**: "Try right clicking on a photo and using 'Replace Image' to show your own photo." (This appears to be a design tool artifact, not related to the content.)
+
+**Visual Element**: Includes an image of a workspace with computers and a city view.
+
+## Background
+### Key Keywords
+The PDF defines important terms in tables across two pages:
+
+| Keyword                  | Description                                                                 |
+|--------------------------|-----------------------------------------------------------------------------|
+| Access Control           | This refers to the process of restricting access to certain parts of a system or application based on user permissions. |
+| Permissions              | These are rules that define what actions a user can perform within a system. For example, “show article” or “edit article” or “delete article”. |
+| Laravel Policy           | This is a feature in the Laravel framework used to organize and manage authorization logic. Mainly associated with Laravel Model. |
+| Spatie Laravel-Permission Package | This is a popular package in Laravel that helps manage roles and permissions in an application. |
+
+**Visual Element**: Tables with green headers for clarity.
+
+## Process
+The overall process is outlined as a flowchart:
+
+1. **Define and List Permissions**: Break down the actions within your application.
+2. **Spatie Permission Assignment**: Provide a layout to assign permission to user.
+3. **Layout Visibility**: Set the visibility of the components, e.g., buttons, sidebar.
+4. **Laravel Policy**: Set the rules to determine whether the user can perform the action.
+
+**Visual Element**: A horizontal flowchart with arrows connecting the steps, represented as boxes.
+
+## Guidelines
+This section provides detailed, step-by-step instructions for implementation, based on the PDF's guidelines. Each subsection corresponds to a key point in the document, with transcribed code examples from the screenshots.
+
+### Step 1: Set Up User Model with Spatie Traits
+Set `use HasRoles;` in the User model to enable role and permission management via Spatie.
+
+**Code Example** (Transcribed from Page 9 screenshot):
+```php
+<?php
+
+namespace App\Models;
+
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
+
+class User extends Authenticatable
+{
+    use HasApiTokens;
+    use HasFactory;
+    use Notifiable;
+    use HasRoles;  // Key trait for Spatie permissions
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
+}
+```
+
+### Step 2: Define Permission Naming Standard
+Permission naming standard will consist of module sitemap followed by CRUD (show/create/edit/delete) actions.
+
+**Example Table** (From Page 10):
+
+| User Level Grouping | Module Grouping | Module              | Action | Permission                                      |
+|---------------------|-----------------|---------------------|--------|-------------------------------------------------|
+| administrations    | accounts       | terminate-account-logs | show   | administrations.accounts.terminate-account-logs:show |
+| administrations    | accounts       | terminate-account-logs | create | administrations.accounts.terminate-account-logs:create |
+| administrations    | accounts       | terminate-account-logs | edit   | administrations.accounts.terminate-account-logs:edit |
+| administrations    | accounts       | terminate-account-logs | delete | administrations.accounts.terminate-account-logs:delete |
+
+**Implementation Steps**:
+1. Identify modules and submodules in your application.
+2. Append CRUD actions to form permission strings (e.g., `module.submodule:action`).
+3. Ensure consistency across projects.
+
+### Step 3: List Permissions in Config File and Upsert
+List down the permissions inside `permission.php` as below. After that, run `php artisan permission:upsert` command. This command will add new permissions to the permissions table.
+
+**Code Example** (Transcribed from Page 11 screenshot):
+```php
+<?php
+
+return [
+    'cache' => 'default',
+
+    'modules' => [
+        'administrations.accounts.show',
+        'administrations.accounts.create',
+        'administrations.accounts.edit',
+        'administrations.accounts.delete',
+        'administrations.accounts.terminate-account-logs:show',
+        'administrations.accounts.terminate-account-logs:create',
+        'administrations.accounts.terminate-account-logs:edit',
+        'administrations.accounts.terminate-account-logs:delete',
+        // Add more permissions as needed
+    ],
+];
+```
+
+**Implementation Steps**:
+1. Edit `config/permission.php` (or similar config file) to include an array of permission strings.
+2. Run the Artisan command: `php artisan permission:upsert`.
+3. This syncs permissions to the database without duplicating existing ones.
+
+### Step 4: Provide UI for Assigning Permissions
+Provide a user interface to assign permissions to user module.
+
+**Visual Element** (From Page 12 screenshot): A mockup of a UI form with checkboxes for permissions grouped by modules (e.g., Accounts, Network Tree, General Document). Categories include show, edit, delete, create, etc.
+
+**Implementation Steps**:
+1. Create a Blade view or Livewire component for admin users to select permissions via checkboxes.
+2. Group permissions by modules for better UX (e.g., tree structure).
+3. On form submission, sync selected permissions to the user.
+
+### Step 5: Assign Permissions Programmatically
+Assign the permission to the user using the Spatie Laravel Permission `syncPermissions`.
+
+**Code Example** (Transcribed from Page 13 screenshot):
+```php
+public function execute(Object $object, String $actionType)
+{
+    $user = User::create([
+        'username' => $object->username,
+        'password' => $object->password,
+        'full_name' => $object->full_name,
+        'email' => $object->email,
+        'account_id' => auth()->user()->account_id,
+    ]);
+
+    $user->syncPermissions($object->permission_ids);
+}
+```
+
+**Implementation Steps**:
+1. In your controller (e.g., user creation or update), collect permission IDs from the request.
+2. Use `$user->syncPermissions($permissions)` to assign/replace permissions.
+3. This ensures users have exactly the specified permissions.
+
+### Step 6: Control UI Visibility with Blade Directives
+Set the visibility of UI components such as sidebars and other elements using `@can` and `@canany`.
+
+**Code Example** (Transcribed from Page 14 screenshot):
+```blade
+@canany(['administrations.accounts.accounts:show', 'administrations.accounts.users:show', 'administrations.accounts.account-sync-orders:show',
+         'administrations.accounts.update-bank-accounts:show', 'administrations.accounts.activate-accounts:show', 'administrations.accounts.
+         partner-verifications:show'])
+    <x-side-navigation-menu module-group section-name="administrations" name="accounts">
+        <!-- Sidebar items -->
+    </x-side-navigation-menu>
+@endcanany
+```
+
+**Implementation Steps**:
+1. Wrap UI elements (e.g., sidebar links, buttons) in `@can('permission')` or `@canany(['perm1', 'perm2'])`.
+2. Use `@else` for fallback content if permission is denied.
+3. This hides elements client-side based on user permissions.
+
+### Step 7: Apply Permission Checks to Common Buttons
+Formation already apply permission checking for common buttons.
+
+**Visual Elements** (From Pages 15-16 screenshots):
+- Page 15: Code for a dropdown menu with options like Create, Import, Bulk Edit, Move, Reorder, Export. Permissions are checked via `@if` or similar.
+- Page 16: Code for individual buttons (Show, Edit, Delete) with timestamps, using `@can` directives.
+
+**Example Code Snippet** (Transcribed from Page 15):
+```blade
+<x-formation-button-group>
+    @can('create')
+        <x-formation-button type="create">Create</x-formation-button>
+    @endcan
+    <!-- Similar for import, bulk edit, etc. -->
+</x-formation-button-group>
+```
+
+**Implementation Steps**:
+1. Use pre-built components (e.g., Formation library) that embed permission checks.
+2. For custom buttons, wrap in `@can('action')`.
+3. This prevents unauthorized actions from being visible or clickable.
+
+### Step 8: Map Policy Methods to Permissions and Actions
+The following policy methods will be mapped to their corresponding permission and controller action.
+
+**Mapping Table** (From Page 17):
+
+| Policy Method | Permission | Controller Action |
+|---------------|------------|-------------------|
+| viewAny      | show      | index            |
+| view         | show      | show             |
+| create       | create    | create, store    |
+| update       | edit      | edit, update     |
+| delete       | delete    | destroy          |
+
+**Implementation Steps**:
+1. In your Policy classes, implement these methods.
+2. Use them in controllers via `$this->authorize('method', Model::class)`.
+
+### Step 9: Implement Restrictions in Policy Classes
+Comply to the steps below in your Policy class:
+- **Restrict by Module**:
+  1. Get current path.
+  2. Check whether user has the permission on the path.
+- **Restrict by Data**:
+  1. Put any extra conditions according to the business requirements (e.g., Check whether user is within the organization of the resources).
+
+Set `use BasePolicy;` in policy class to get the current request path.
+
+**Code Example: Base Setup** (Transcribed from Page 19 screenshot):
+```php
+namespace App\Policies;
+
+use App\Models\AreaManagerApplication;
+use App\Models\User;
+use Illuminate\Auth\Access\Response;
+
+class AreaManagerApplicationPolicy
+{
+    use BasePolicy;
+
+    /**
+     * Determine whether the user can view a model.
+     */
+    public function viewAny(User $user): bool
+    {
+        // Policy logic here
+    }
+}
+```
+
+**Code Example: Restrict by Module** (Transcribed from Page 20 screenshot):
+```php
+/**
+ * Determine whether the user can view any models.
+ */
+public function viewAny(User $user): bool
+{
+    if ($this->currentPath == 'administrations.accounts.account-sync-orders') {
+        return $user->hasPermissionTo('administrations.accounts.account-sync-orders:show');
+    }
+
+    return false;
+}
+```
+
+**Code Example: Restrict by Module and Data** (Transcribed from Page 21 screenshot):
+```php
+/**
+ * Determine whether the user can view any models.
+ */
+public function viewAny(User $user): bool
+{
+    if ($this->currentPath == 'administrations.accounts.account-sync-orders') {
+        if ($user->hasPermissionTo('administrations.accounts.account-sync-orders:show')) {
+            // Data restriction example
+            if ($user->account->partnership_id == 1) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+```
+
+**Implementation Steps**:
+1. Extend `BasePolicy` for path utilities.
+2. In each method (e.g., `viewAny`), check module permission using `$user->hasPermissionTo()`.
+3. Add data-specific conditions (e.g., ownership, organization checks).
+4. Register policies in `AuthServiceProvider`.
+
+## Additional Notes
+- **Images and Visuals**: The PDF uses modern design with gradients, icons, and stock photos (e.g., mountains, offices) for aesthetics. Code snippets are in dark mode for readability.
+- **Best Practices**: Always test permissions end-to-end. Use roles for grouping permissions if needed (via Spatie).
+- **Potential Improvements**: Integrate with Gates for non-model authorizations.
+
+This MD serves as a self-contained guide. If you need code generation or further customization, provide more details!

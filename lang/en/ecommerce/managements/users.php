@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'name' => 'Name',
+    'email' => 'Email',
+    'password' => 'Password',
+    'role' => 'Role',
+    'permissions_categories' => 'Category Permissions',
+    'permissions_products' => 'Product Permissions',
+    'permissions_orders' => 'Order Permissions',
+    'permissions_items' => 'Item Permissions',
+    'permissions_users' => 'User Permissions',
+    'created_by' => 'Created By',
+    'updated_by' => 'Updated By',
+    'deleted_by' => 'Deleted By',
+    'created_at' => 'Created At',
+    'updated_at' => 'Updated At',
+    'deleted_at' => 'Deleted At',
+    'deleted_token' => 'Deleted Token',
+    'partition_created_at' => 'Partition Created At',
+    'users' => 'Users',
+    'module_description' => '',
+    'username' => 'Username',
+    'contact_number' => 'Contact Number',
+    'admin' => 'Admin',
+    'user' => 'User',
+];

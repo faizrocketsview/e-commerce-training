@@ -1,0 +1,32 @@
+{
+    "name": "leekhengteck/formation",
+    "description": "A CRUD form and API generator",
+    "require": {
+        "livewire/livewire": "^2.4",
+        "laravel/jetstream": "^3.2",
+        "laravel/sanctum": "^3.0"
+    },
+    "require-dev": {
+        
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Lee Kheng Teck",
+            "email": "ahteck81@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": {
+            "Formation\\": "src"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Formation\\FormationServiceProvider"
+            ]
+        }
+    }
+}
