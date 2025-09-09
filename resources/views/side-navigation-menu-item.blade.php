@@ -26,7 +26,7 @@
                             <x-side-navigation-menu.module-group sectionname="ecommerce" name="managements">
                                 <x-slot name="icon">
                                     <svg class="mr-4 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m0 0v12h9.75m-9.75 0v-12M7.5 6h3.75m-3.75 0a1.5 1.5 0 00-3 0m3 0a1.5 1.5 0 013 0m-3 0v12m0 0a1.5 1.5 0 103 0m-3 0a1.5 1.5 0 00-3 0m3 0v-12" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75h6.75v6.75H3.75V3.75zM13.5 3.75h6.75v6.75H13.5V3.75zM3.75 13.5h6.75v6.75H3.75V13.5zM13.5 13.5h6.75v6.75H13.5V13.5z" />
                                     </svg>
                                 </x-slot>
 

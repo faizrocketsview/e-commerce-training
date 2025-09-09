@@ -523,7 +523,13 @@
                                                         $itemActionPermission = $moduleSection.'.'.$moduleGroup.'.'.$module.':show';
                                                         break;
                                                     case 'edit':
-                                                        $itemActionPermission = $moduleSection.'.'.$moduleGroup.'.'.$module.':edit';
+                                                        // Prefer ':update' for edit operation; fall back to ':edit' if needed
+                                                        $updatePerm = $moduleSection.'.'.$moduleGroup.'.'.$module.':update';
+                                                        $editPerm = $moduleSection.'.'.$moduleGroup.'.'.$module.':edit';
+                                                        $itemActionPermission = app(\Spatie\Permission\PermissionRegistrar::class);
+                                                        // We cannot check permission existence easily here; send both and check in policy layer
+                                                        // So default to ':update'
+                                                        $itemActionPermission = $updatePerm;
                                                         break;
                                                     case 'delete':
                                                         $itemActionPermission = $moduleSection.'.'.$moduleGroup.'.'.$module.':delete';

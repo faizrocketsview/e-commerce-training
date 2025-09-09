@@ -32,11 +32,18 @@ class OrderFormation
         return Formation::createIndex('index', function (Index $index) use ($object) {
             $index
                 ->select(function (Select $select) {
-                    // Show: User (name), Status, Total, Created At (for default sort)
-                    $select->field('id')->hide();
+                    // Show: User (name), Status (with badge), Total, Created At
+                    $select->field('id')->sortable();
                     $select->field('user_id')->with('user')->reference('name')->sortable();
-                    $select->field('status')->sortable()->display('badge');
-                    $select->field('total')->sortable()->display('currency');
+                    $select->field('status')->sortable()->group(function ($field) {
+                        $field->badge('draft', 'gray');
+                        $field->badge('pending', 'yellow');
+                        $field->badge('paid', 'green');
+                        $field->badge('shipped', 'blue');
+                        $field->badge('completed', 'indigo');
+                        $field->badge('cancelled', 'red');
+                    });
+                    $select->field('total')->sortable()->align('right');
                     $select->field('created_at')->sortable()->display('md')->sortByDefault('desc');
                 })
                 ->export(function (Export $export) {
@@ -181,6 +188,10 @@ class OrderFormation
                         $field->number('quantity')->span(1)->group(function (Field $subField) {
                             $subField->rules(['required', 'integer', 'min:1', 'max:9999']);
                         });
+                        // Display fields for existing values in edit/show
+                        // $field->text('product_name')->span(2)->readonly();
+                        // $field->text('sku')->span(1)->readonly();
+                        // $field->number('unit_price')->span(1)->readonly();
                         
                     });
                 });
@@ -250,36 +261,20 @@ class OrderFormation
             });
 
             // Order Items Section
-            $card->create('Order Items')->column(1)->group(function (Section $section) use ($object) {
-                $section->create('')->span(1)->column(1)->group(function (Column $column) use ($object) {
-                    $column->subfieldBox('orderItems')->with('orderItems')->span(1)->group(function (Field $field) {
-                        $field->select('product_id')->span(2)->group(function (Field $subField) {
-                            $subField->option('', 'Select Product');
-                            foreach(\App\Models\Product::where('status', 'active')->get() as $product) {
-                                $subField->option($product->id, $product->name . ' (' . $product->sku . ') - Stock: ' . $product->stock . ' - Price: $' . number_format((float)$product->price, 2));
-                            }
-                            $subField->rules(['required', 'exists:products,id']);
-                        });
+            // $card->create('Order Items')->column(1)->group(function (Section $section) use ($object) {
+            //     $section->create('')->span(1)->column(1)->group(function (Column $column) use ($object) {
+            //         $column->subfieldBox('orderItems')->with('orderItems')->span(1)->group(function (Field $field) {
                         
-                        $field->text('product_name')->span(2)->readonly()->group(function (Field $subField) {
-                            $subField->rules(['required', 'string', 'max:200']);
-                        });
-                        
-                        $field->text('sku')->span(1)->readonly()->group(function (Field $subField) {
-                            $subField->rules(['required', 'string', 'max:64']);
-                        });
-                        
-                        $field->number('unit_price')->span(1)->readonly()->group(function (Field $subField) {
-                            $subField->rules(['required', 'numeric', 'min:0']);
-                        });
-                        
-                        $field->number('quantity')->span(1)->group(function (Field $subField) {
-                            $subField->rules(['required', 'integer', 'min:1', 'max:9999']);
-                        });
-                        
-                    });
-                });
-            });
+
+            //             // Readable display for edit mode
+            //             $field->displayText('product_name', 'Product Name')->span(2);
+            //             $field->displayText('sku', 'SKU')->span(1);
+            //             $field->displayText('unit_price', 'Unit Price')->span(1)->display('currency');
+    
+
+            //         });
+            //     });
+            // });
         });
     }
 

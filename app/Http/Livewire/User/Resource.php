@@ -88,6 +88,9 @@ class Resource extends BaseResource
                 if (is_string($value)) {
                     $value = explode('|', $value);
                 }
+                if ($value instanceof \Illuminate\Support\Collection) {
+                    $value = $value->toArray();
+                }
                 $permissionData[$field] = array_filter($value);
             }
         }
@@ -113,6 +116,9 @@ class Resource extends BaseResource
                                     $value = $this->editing->$fieldName;
                                     if (is_string($value)) {
                                         $value = explode('|', $value);
+                                    }
+                                    if ($value instanceof \Illuminate\Support\Collection) {
+                                        $value = $value->toArray();
                                     }
                                     $this->editing->$fieldName = array_filter($value);
                                 }
@@ -146,6 +152,9 @@ class Resource extends BaseResource
                             {
                                 if (isset($this->editing->$fieldName))
                                     $temp = $this->editing->$fieldName;
+                                    if ($temp instanceof \Illuminate\Support\Collection) {
+                                        $temp = $temp->toArray();
+                                    }
                                     ksort($temp);
                                     $this->editing->$fieldName = implode('|', array_filter($temp));
                             }
@@ -191,9 +200,9 @@ class Resource extends BaseResource
 
         $parentWithoutRelations = clone($this->editing);
 
-        // Remove permission fields from the object before saving
+        // Ensure permission fields are present on the object for SaveAction to sync
         foreach ($permissionFields as $field) {
-            unset($parentWithoutRelations->$field);
+            $parentWithoutRelations->$field = $permissionData[$field] ?? [];
         }
 
         foreach ($subClasses as $subClass) {
@@ -232,13 +241,13 @@ class Resource extends BaseResource
      */
     protected function loadUserPermissions()
     {
-        // Get the actual user with permissions loaded
-        $user = \App\Models\User::with('permissions')->find($this->editing->id);
+        // Get the actual user with full permissions (direct + via roles)
+        $user = \App\Models\User::find($this->editing->id);
         if (!$user) {
             return;
         }
 
-        $userPermissions = $user->permissions->pluck('id')->toArray();
+        $userPermissions = $user->getAllPermissions()->pluck('id')->toArray();
 
         // Group permissions by module (field names are now simple: categories, products, etc.)
         $permissionFields = [

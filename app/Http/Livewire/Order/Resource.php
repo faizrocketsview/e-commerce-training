@@ -179,8 +179,9 @@ class Resource extends BaseResource
      */
     public function executeEdit()
     {
-        // Load the order without order items first
+        // Load the order and eager-load order items for editing UI
         $this->editing = $this->model::findOrFail($this->formId);
+        $this->editing->load('orderItems');
         // Ensure reactive containers exist
         if (!isset($this->subClassItems) || !is_array($this->subClassItems)) {
             $this->subClassItems = [];
@@ -189,13 +190,14 @@ class Resource extends BaseResource
             $this->editedSubClassFields = [];
         }
         
-        // Load order items separately
-        $this->loadOrderItems();
-        
         // Set authorization
         $this->authorize('update', [$this->editing, $this->moduleSection.'.'.$this->moduleGroup.'.'.$this->module, $this->itemId]);
         
         $this->useCachedRows();
+
+        // After potential re-hydration, load order items and attach to editing for inputs to bind
+        $this->loadOrderItems();
+        $this->editing->load('orderItems');
     }
 
     /**
@@ -566,20 +568,22 @@ class Resource extends BaseResource
             $parts = explode('.', $key);
             if (count($parts) >= 3) {
                 $index = $parts[1];
-                if (isset($this->editing->orderItems[$index])) {
+                $orderItems = $this->editing->orderItems;
+                if (isset($orderItems[$index])) {
                     $product = Product::find($value);
                     if ($product) {
-                        $this->editing->orderItems[$index]->product_name = $product->name;
-                        $this->editing->orderItems[$index]->sku = $product->sku;
-                        $this->editing->orderItems[$index]->unit_price = $product->price;
+                        $orderItems[$index]->product_name = $product->name;
+                        $orderItems[$index]->sku = $product->sku;
+                        $orderItems[$index]->unit_price = $product->price;
                         
                         // Set quantity to 1 if not set, or validate against stock
-                        $currentQuantity = $this->editing->orderItems[$index]->quantity ?? 1;
+                        $currentQuantity = $orderItems[$index]->quantity ?? 1;
                         if ($currentQuantity > $product->stock) {
-                            $this->editing->orderItems[$index]->quantity = $product->stock;
+                            $orderItems[$index]->quantity = $product->stock;
                             $currentQuantity = $product->stock;
                         }
-                        
+                        // reassign collection back to relation to avoid indirect modification errors
+                        $this->editing->setRelation('orderItems', $orderItems);
                     }
                 }
             }
@@ -589,20 +593,22 @@ class Resource extends BaseResource
             $parts = explode('.', $key);
             if (count($parts) >= 3) {
                 $index = $parts[1];
-                if (isset($this->editing->orderItems[$index])) {
+                $orderItems = $this->editing->orderItems;
+                if (isset($orderItems[$index])) {
                     $quantity = (int) $value;
-                    $productId = $this->editing->orderItems[$index]->product_id ?? null;
+                    $productId = $orderItems[$index]->product_id ?? null;
                     
                     // Validate quantity against stock
                     if ($productId) {
                         $product = Product::find($productId);
                         if ($product && $quantity > $product->stock) {
-                            $this->editing->orderItems[$index]->quantity = $product->stock;
+                            $orderItems[$index]->quantity = $product->stock;
                             $quantity = $product->stock;
                             $this->notify('warning', 'Quantity exceeds available stock. Set to maximum available: ' . $product->stock);
                         }
                     }
-                    
+                    // reassign collection back to relation to avoid indirect modification errors
+                    $this->editing->setRelation('orderItems', $orderItems);
                 }
             }
         }

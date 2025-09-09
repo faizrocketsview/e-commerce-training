@@ -1,12 +1,16 @@
 <div class="mt-2">
 @php
     if($type == 'create' || $type == 'edit') {
-        if(isset($editedSubClassFields)){
+        // Prefer pre-hydrated arrays from the component when available; otherwise fallback to relation
+        if(isset($editedSubClassFields) 
+            && isset($editedSubClassFields[$field->with]) 
+            && is_array($editedSubClassFields[$field->with]) 
+            && sizeof($editedSubClassFields[$field->with]) > 0){
             $subClassFields = $editedSubClassFields[$field->with];
-        }else{
+        } else {
             $subClassFields = $editing->{$field->with};
         }
-    }else {
+    } else {
         $subClassFields = $editing->{$field->with};
     }
 @endphp
@@ -30,7 +34,12 @@
             @if ($subfield->type != 'preset')
                 <x-input.group type="{{ $type }}" span="{{ $subfield->span }}" for="editing.{{ $subfield->name }}" label="{{ $subfield->label }}" help="{{ $subfield->help }}" description="{{ $subfield->description }}" required="{{ $subfield->required }}" hide="{{ $subfield->hide }}" moduleSection="{{ $moduleSection }}" moduleGroup="{{ $moduleGroup }}" module="{{ $module }}" :error="$errors->first('editing.' .$field->with. '.' .$key. '.' .$subfield->name)">
                     @php
-                        $value = $editing->{$field->with}[$key]->{$subfield->name}
+                        // When editing, values may come from $editedSubClassFields (arrays) instead of Eloquent relations
+                        if(isset($editedSubClassFields)) {
+                            $value = $subClassFields[$key][$subfield->name] ?? null;
+                        } else {
+                            $value = $editing->{$field->with}[$key]->{$subfield->name} ?? null;
+                        }
                     @endphp
 
                     <div class="flex items-center mt-1">
@@ -135,14 +144,13 @@
 
 @endforeach
 
-@if(isset($subClassItems[$field->with]))
+@if($type == 'create' && isset($subClassItems[$field->with]))
     @if(isset($subClassFields) && sizeof($subClassFields) > 0)
     <div>
         <div class="w-full border-t border-gray-300"></div>
     </div>
     @endif
 
-    
     @foreach ($subClassItems[$field->with] as $key => $item)
     <div class="text-gray-400 hover:text-gray-600 bg-gray-100 {{ $key == 0 && (sizeof($subClassFields) == 0) ? 'rounded-t-lg' : '' }} px-4 sm:px-6 pt-2 sm:pt-4 ">
         <div class="flex flex-row-reverse">
@@ -232,7 +240,7 @@
     }
 @endphp
 
-@if($type == 'create' || $type == 'edit')
+@if($type == 'create')
 <div class="mt-2 text-gray-400 hover:text-gray-600">
     <svg wire:click="addSubClassField('{{ $field->with }}', '{{ implode(',', $tableHeaders) }}')" class="w-5 h-5 cursor-pointer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
         <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />

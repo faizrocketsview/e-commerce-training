@@ -20,7 +20,7 @@ use App\Actions\Formation\Index\Action;
 use App\Actions\Formation\Index\ItemAction;
 
 use App\Models\User;
-use App\Models\Permission;
+use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
@@ -148,6 +148,10 @@ class UserFormation
                     foreach ($allPermissions as $model => $modelPermissions) {
                         $column->checkboxButtonMultiple('permissions_' . $model)->span(1)->column(2)->group(function (Field $field) use ($modelPermissions) {
                             foreach ($modelPermissions as $permission) {
+                                // Skip legacy ':edit' permissions to avoid duplicate with ':update'
+                                if (str_ends_with($permission->name, ':edit')) {
+                                    continue;
+                                }
                                 $permissionName = explode(":", $permission->name)[1];
                                 $field->option($permission->id, $permissionName);
                             }
@@ -193,47 +197,6 @@ class UserFormation
                         $field->option('user', 'User');
                         $field->rules(['required', Rule::in(['admin', 'user'])]);
                     });
-                });
-            });
-
-            // Add Permissions section for edit form
-            $card->create('Permissions')->column(1)->group(function (Section $section) use ($object) {
-                $section->create('')->span(1)->column(2)->group(function (Column $column) use ($object) {
-                    // Group permissions by the last part of the namespace (e.g., ecommerce.managements.categories -> categories)
-                    $permissions = Permission::get();
-                    $grouped = $permissions->groupBy(function ($item) {
-                        $beforeColon = explode(':', $item->name)[0];        // ecommerce.managements.categories
-                        return last(explode('.', $beforeColon));            // categories
-                    });
-
-                    // Create checkboxButtonMultiple fields for each permission group
-                    foreach ($grouped as $key => $group) {
-                        $column->checkboxButtonMultiple($key)->span(1)->group(function (Field $field) use ($group, $object) {
-                            foreach ($group as $permission) {
-                                $field->option($permission->id, explode(':', $permission->name)[1]);
-                            }
-                            
-                            // Set the current values for editing
-                            $field->value(function($field) use ($object) {
-                                // Get the current user's permissions
-                                $user = \App\Models\User::with('permissions')->find($object->formId);
-                                if (!$user) {
-                                    return [];
-                                }
-                                
-                                $userPermissions = $user->permissions->pluck('id')->toArray();
-                                $module = $field->name;
-                                $modulePermissions = \App\Models\Permission::where('name', 'like', "ecommerce.managements.{$module}:%")
-                                    ->pluck('id')
-                                    ->toArray();
-                                
-                                $userModulePermissions = array_intersect($userPermissions, $modulePermissions);
-                                return array_values($userModulePermissions);
-                            });
-                            
-                            $field->rules(['nullable', 'array']);
-                        });
-                    }
                 });
             });
         });

@@ -17,4 +17,6 @@ return [
     'type' => 'Type',
     'status' => 'Status',
     'slug' => 'Slug',
+    'active' => 'Active',
+    'inactive' => 'Inactive',
 ];

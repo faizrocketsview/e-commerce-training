@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'id' => 'Order ID',
     'user_id' => 'User',
     'status' => 'Status',
     'currency' => 'Currency',
@@ -26,4 +27,7 @@ return [
     'quantity' => 'Quantity',
     'details' => 'Details',
     'module_description' => '',
+    'product_name' => 'Product Name',
+    'sku' => 'SKU',
+    
 ];
