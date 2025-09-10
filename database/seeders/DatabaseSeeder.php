@@ -20,11 +20,16 @@ class DatabaseSeeder extends Seeder
             'name' => 'Admin User',
             'email' => 'admin@example.com',
             'password' => bcrypt('password'),
-            'role' => 'admin',
         ]);
 
-        // Give admin all permissions
-        $admin->givePermissionTo(\Spatie\Permission\Models\Permission::all());
+        // Create admin role if it doesn't exist
+        $adminRole = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'admin']);
+        
+        // Assign admin role to the user
+        $admin->assignRole($adminRole);
+        
+        // Give admin role all permissions
+        $adminRole->givePermissionTo(\Spatie\Permission\Models\Permission::all());
         
         // Seed products
         $this->call(ProductSeeder::class);

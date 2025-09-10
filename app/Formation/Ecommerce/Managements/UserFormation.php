@@ -139,28 +139,27 @@ class UserFormation
 
             $card->create('Permissions')->column(1)->group(function (Section $section) use ($object) {
                 $section->create('')->span(1)->column(2)->group(function (Column $column) use ($object) {
-                    $allPermissions = Permission::all()->groupBy(function ($permission) {
-                        $modelNamespace = explode(":", $permission->name)[0];
-                        $modelName = explode(".", $modelNamespace)[2];
-                        return $modelName;
-                    });
-
-                    foreach ($allPermissions as $model => $modelPermissions) {
-                        $column->checkboxButtonMultiple('permissions_' . $model)->span(1)->column(2)->group(function (Field $field) use ($modelPermissions) {
-                            foreach ($modelPermissions as $permission) {
-                                // Skip legacy ':edit' permissions to avoid duplicate with ':update'
-                                if (str_ends_with($permission->name, ':edit')) {
-                                    continue;
-                                }
+                    // Define the modules we want to show permissions for
+                    $modules = ['categories', 'products', 'orders', 'items', 'users'];
+                    
+                    foreach ($modules as $module) {
+                        $column->checkboxButtonMultiple('permissions_' . $module)->span(1)->column(2)->group(function (Field $field) use ($module) {
+                            // Get permissions for this specific module
+                            $modulePermissions = Permission::where('name', 'like', "ecommerce.managements.{$module}:%")
+                                ->where('name', 'not like', '%:edit') // Skip edit permissions to avoid duplicates
+                                ->get();
+                            
+                            foreach ($modulePermissions as $permission) {
                                 $permissionName = explode(":", $permission->name)[1];
-                                $field->option($permission->id, $permissionName);
+                                $field->option($permission->id, ucfirst($permissionName));
                             }
+                            
                             // Set default empty array
                             $field->value(function() { return []; });
                             // Add validation rules for the permission field
                             $field->rules(['nullable', 'array']);
                             // Add array element validation rules
-                            $field->arrayRules = ['nullable', 'array'];
+                            $field->arrayRules = ['nullable', 'integer'];
                         });
                     }
 
@@ -197,6 +196,35 @@ class UserFormation
                         $field->option('user', 'User');
                         $field->rules(['required', Rule::in(['admin', 'user'])]);
                     });
+                });
+            });
+
+            // Add permissions section for edit form
+            $card->create('Permissions')->column(1)->group(function (Section $section) use ($object) {
+                $section->create('')->span(1)->column(2)->group(function (Column $column) use ($object) {
+                    // Define the modules we want to show permissions for
+                    $modules = ['categories', 'products', 'orders', 'items', 'users'];
+                    
+                    foreach ($modules as $module) {
+                        $column->checkboxButtonMultiple('permissions_' . $module)->span(1)->column(2)->group(function (Field $field) use ($module) {
+                            // Get permissions for this specific module
+                            $modulePermissions = Permission::where('name', 'like', "ecommerce.managements.{$module}:%")
+                                ->where('name', 'not like', '%:edit') // Skip edit permissions to avoid duplicates
+                                ->get();
+                            
+                            foreach ($modulePermissions as $permission) {
+                                $permissionName = explode(":", $permission->name)[1];
+                                $field->option($permission->id, ucfirst($permissionName));
+                            }
+                            
+                            // Set default empty array
+                            $field->value(function() { return []; });
+                            // Add validation rules for the permission field
+                            $field->rules(['nullable', 'array']);
+                            // Add array element validation rules
+                            $field->arrayRules = ['nullable', 'integer'];
+                        });
+                    }
                 });
             });
         });

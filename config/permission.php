@@ -174,6 +174,54 @@ return [
      */
     // 'wildcard_permission' => Spatie\Permission\WildcardPermission::class,
 
+    /*
+     * Define all permissions for the application
+     * These will be used by the permission:upsert command
+     */
+    'permissions' => [
+        // Navigation permissions for side menu
+        'ecommerce.managements.categories:show',
+        'ecommerce.managements.products:show',
+        'ecommerce.managements.orders:show',
+        'ecommerce.managements.items:show',
+        'ecommerce.managements.users:show',
+        
+        // Product Categories
+        'ecommerce.managements.categories:create',
+        'ecommerce.managements.categories:read',
+        'ecommerce.managements.categories:update',
+        'ecommerce.managements.categories:edit',
+        'ecommerce.managements.categories:delete',
+        
+        // Products
+        'ecommerce.managements.products:create',
+        'ecommerce.managements.products:read',
+        'ecommerce.managements.products:update',
+        'ecommerce.managements.products:edit',
+        'ecommerce.managements.products:delete',
+        
+        // Orders
+        'ecommerce.managements.orders:create',
+        'ecommerce.managements.orders:read',
+        'ecommerce.managements.orders:update',
+        'ecommerce.managements.orders:edit',
+        'ecommerce.managements.orders:delete',
+        
+        // Order Items
+        'ecommerce.managements.items:create',
+        'ecommerce.managements.items:read',
+        'ecommerce.managements.items:update',
+        'ecommerce.managements.items:edit',
+        'ecommerce.managements.items:delete',
+        
+        // Users
+        'ecommerce.managements.users:create',
+        'ecommerce.managements.users:read',
+        'ecommerce.managements.users:update',
+        'ecommerce.managements.users:edit',
+        'ecommerce.managements.users:delete',
+    ],
+
     /* Cache-specific settings */
 
     'cache' => [

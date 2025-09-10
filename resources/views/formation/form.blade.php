@@ -288,6 +288,14 @@
                                             <livewire:file-uploader :name="$field->name" :required="$field->required ?? false" disabled="{{ $field->disabled }}" :maximumFile="$field->maximumFile ?? '1'" :rules="$field->rules" :importType="$this->importType" :model="$field->model" :files="$editing->{$field->name}" :folderPath="$field->folderPath ?? '/'" :sampleFile="$field->sampleFile" :headers="collect($column->items)->pluck('name')" :wire:key="$field->name"/>
                                             @break
 
+                                        @case('checkboxMultiple')
+                                            <x-input.radio-group flex="{{ $field->flex }}" id="editing.{{ $field->name }}">
+                                                @foreach($field->options as $option)
+                                                    <x-input.checkbox-multiple source="editing" lazy="{{ $field->lazy }}" debounce="{{ $field->debounce }}" name="{{ $field->name }}" option="{{ $option->name }}" disabled="{{ $field->disabled }}" value="{{ $option->name }}" autofocus="{{ $field->autofocus }}">{{ $option->label }}</x-input.checkbox-multiple>
+                                                @endforeach
+                                            </x-input.radio-group>
+                                            @break
+
                                         @case('coordinate')
                                             @break
 
@@ -295,49 +303,8 @@
                                             @include('components.input.subfield-box')
                                             @break;
 
-                                        @case('checkboxMultiple')
-                                            @include('components.input.checkboxMultiple', [
-                                                'source' => 'editing',
-                                                'name' => $field->name,
-                                                'options' => $field->options ?? [],
-                                                'lazy' => $field->lazy,
-                                                'debounce' => $field->debounce,
-                                                'disabled' => $field->disabled,
-                                                'autofocus' => $field->autofocus,
-                                            ])
-                                            @break;
-
-                                        @case('checkboxButtonMultiple')
-                                            @include('components.input.checkboxMultiple', [
-                                                'source' => 'editing',
-                                                'name' => $field->name,
-                                                'options' => $field->options ?? [],
-                                                'lazy' => $field->lazy,
-                                                'debounce' => $field->debounce,
-                                                'disabled' => $field->disabled,
-                                                'autofocus' => $field->autofocus,
-                                            ])
-                                            @break;
-
                                         @default
-                                            @include('components.input.'.$field->type, [
-                                                'source' => 'editing',
-                                                'name' => $field->name,
-                                                'lazy' => $field->lazy,
-                                                'debounce' => $field->debounce,
-                                                'disabled' => $field->disabled,
-                                                'autofocus' => $field->autofocus,
-                                                'placeholder' => $field->placeholder ?? null,
-                                                'readonly' => $field->readonly ?? false,
-                                                'prepend' => $field->prepend ?? null,
-                                                'append' => $field->append ?? null,
-                                                'height' => $field->height ?? null,
-                                                'type' => $field->type,
-                                                'field' => $field,
-                                                'options' => $field->options ?? [],
-                                                'isModelTranslatable' => $isModelTranslatable,
-                                                'lang' => $isModelTranslatable ? ($field->lang ?? config('app.fallback_locale')) : null
-                                            ])
+                                            @include('components.input.'.$field->type)
 
                                     @endswitch
                                     @endif

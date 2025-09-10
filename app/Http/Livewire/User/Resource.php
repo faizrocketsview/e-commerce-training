@@ -24,11 +24,11 @@ class Resource extends BaseResource
         
         // Add validation rules for permission fields
         $permissionFields = [
-            'categories',
-            'products', 
-            'orders',
-            'items',
-            'users'
+            'permissions_categories',
+            'permissions_products', 
+            'permissions_orders',
+            'permissions_items',
+            'permissions_users'
         ];
         
         foreach ($permissionFields as $field) {
@@ -45,7 +45,7 @@ class Resource extends BaseResource
     public function updatedEditing($value, $key)
     {
         // Handle permission fields - ensure they are arrays
-        $permissionFields = ['categories', 'products', 'orders', 'items', 'users'];
+        $permissionFields = ['permissions_categories', 'permissions_products', 'permissions_orders', 'permissions_items', 'permissions_users'];
         if (in_array($key, $permissionFields)) {
             if (is_null($this->editing->$key) || empty($this->editing->$key)) {
                 $this->editing->$key = [];
@@ -249,22 +249,22 @@ class Resource extends BaseResource
 
         $userPermissions = $user->getAllPermissions()->pluck('id')->toArray();
 
-        // Group permissions by module (field names are now simple: categories, products, etc.)
+        // Group permissions by module (field names are now permissions_categories, permissions_products, etc.)
         $permissionFields = [
-            'categories',
-            'products', 
-            'orders',
-            'items',
-            'users'
+            'permissions_categories' => 'categories',
+            'permissions_products' => 'products', 
+            'permissions_orders' => 'orders',
+            'permissions_items' => 'items',
+            'permissions_users' => 'users'
         ];
 
-        foreach ($permissionFields as $field) {
-            $modulePermissions = Permission::where('name', 'like', "ecommerce.managements.{$field}:%")
+        foreach ($permissionFields as $fieldName => $moduleName) {
+            $modulePermissions = Permission::where('name', 'like', "ecommerce.managements.{$moduleName}:%")
                 ->pluck('id')
                 ->toArray();
             
             $userModulePermissions = array_intersect($userPermissions, $modulePermissions);
-            $this->editing->$field = array_values($userModulePermissions);
+            $this->editing->$fieldName = array_values($userModulePermissions);
         }
     }
 
@@ -277,11 +277,11 @@ class Resource extends BaseResource
         
         // Initialize permission fields as empty arrays
         $permissionFields = [
-            'categories',
-            'products', 
-            'orders',
-            'items',
-            'users'
+            'permissions_categories',
+            'permissions_products', 
+            'permissions_orders',
+            'permissions_items',
+            'permissions_users'
         ];
 
         foreach ($permissionFields as $field) {

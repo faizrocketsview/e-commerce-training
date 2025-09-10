@@ -66,8 +66,7 @@
             <div>
                 <nav class="-mb-px flex flex-wrap" aria-label="Tabs">
 
-                    @if(!empty($indexTabItems))
-                        @foreach ($indexTabItems as $indexTab)
+                    @foreach ($indexTabItems as $indexTab)
 
                     @php
                         foreach ($indexTab->filter as $key => $value)
@@ -89,7 +88,6 @@
                         @endif
                     </button>
                     @endforeach
-                    @endif
                 </nav>
             </div>
 
@@ -523,13 +521,7 @@
                                                         $itemActionPermission = $moduleSection.'.'.$moduleGroup.'.'.$module.':show';
                                                         break;
                                                     case 'edit':
-                                                        // Prefer ':update' for edit operation; fall back to ':edit' if needed
-                                                        $updatePerm = $moduleSection.'.'.$moduleGroup.'.'.$module.':update';
-                                                        $editPerm = $moduleSection.'.'.$moduleGroup.'.'.$module.':edit';
-                                                        $itemActionPermission = app(\Spatie\Permission\PermissionRegistrar::class);
-                                                        // We cannot check permission existence easily here; send both and check in policy layer
-                                                        // So default to ':update'
-                                                        $itemActionPermission = $updatePerm;
+                                                        $itemActionPermission = $moduleSection.'.'.$moduleGroup.'.'.$module.':edit';
                                                         break;
                                                     case 'delete':
                                                         $itemActionPermission = $moduleSection.'.'.$moduleGroup.'.'.$module.':delete';
