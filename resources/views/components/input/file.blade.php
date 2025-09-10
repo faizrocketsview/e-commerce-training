@@ -50,9 +50,13 @@
                 if (in_array($mimeType, $mimeTypes)) {
                     $url = asset('images/formation/' . $mimeTypeIcons[$mimeType]);
                 } else {
-                    $url = Storage::disk('s3')->exists($file)
-                        ? Storage::disk('s3')->temporaryUrl($file, now()->addDay())
-                        : Storage::disk('s3')->temporaryUrl('public/default.png', now()->addDay());
+                    $path = trim(($folderPath ?? '/'), '/');
+                    $key = ($path ? $path.'/' : '').ltrim($file, '/');
+                    $url = Storage::disk('s3')->exists($key)
+                        ? Storage::disk('s3')->temporaryUrl($key, now()->addDay())
+                        : (Storage::disk('s3')->exists('public/default.png')
+                            ? Storage::disk('s3')->temporaryUrl('public/default.png', now()->addDay())
+                            : asset('images/formation/default-file.png'));
                 }
             }
         @endphp

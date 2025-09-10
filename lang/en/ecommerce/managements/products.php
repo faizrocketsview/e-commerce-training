@@ -19,4 +19,6 @@ return [
     'deleted_token' => 'Deleted Token',
     'partition_created_at' => 'Partition Created At',
     'stock' => 'Stock',
+    'details' => 'Details',
+    'slug' => 'Slug',
 ];

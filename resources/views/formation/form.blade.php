@@ -150,14 +150,16 @@
                                             @php
                                             if ($field->with) {
                                                 if($isModelTranslatable) {
-                                                    $value = $tempItem->getTranslation($field->reference, $field->lang) ?? null;
+                                                    $langToUse = $field->lang ?? config('app.fallback_locale', 'en');
+                                                    $value = $tempItem->getTranslation($field->reference, $langToUse) ?? null;
                                                 } else {
                                                     $value = $tempItem->{$field->reference} ?? null;
                                                 }
                                             }
                                             else {
                                                 if($isModelTranslatable) {
-                                                    $value = $editing->getTranslation($field->name, $field->lang) ?? null;
+                                                    $langToUse = $field->lang ?? config('app.fallback_locale', 'en');
+                                                    $value = $editing->getTranslation($field->name, $langToUse) ?? null;
                                                 } else {
                                                     $value = $editing->{$field->name} ?? null;
                                                 }

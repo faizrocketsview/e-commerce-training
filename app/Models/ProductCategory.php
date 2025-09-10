@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Formation\DataTable\WithTranslation;
 
 class ProductCategory extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, WithTranslation;
 
     protected $fillable = [
         'name',
@@ -20,6 +21,8 @@ class ProductCategory extends Model
         'updated_by',
         'deleted_by',
     ];
+
+    public $translatable = ['name'];
 
     protected $attributes = [
         'deleted_token' => null,

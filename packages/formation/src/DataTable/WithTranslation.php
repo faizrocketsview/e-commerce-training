@@ -23,8 +23,9 @@ trait WithTranslation
         parent::boot();
 
         static::retrieved(function (Model $model) {
+            $locale = App::getLocale() ?: config('app.fallback_locale', 'en');
             foreach($model->getTranslatableAttributes() as $attribute) {
-                $model->{$attribute} = $model->getTranslation($attribute, App::getLocale());
+                $model->{$attribute} = $model->getTranslation($attribute, $locale);
             }
         });
     }

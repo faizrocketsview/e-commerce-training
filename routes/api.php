@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use App\Models\User;
-use Formation\Http\Controllers\ApiController;
+// Explicitly use fully-qualified controller to avoid namespace ambiguity
 
 /*
 |--------------------------------------------------------------------------
@@ -41,8 +41,8 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
     
-    Route::apiResource('/{moduleSection}/{moduleGroup}/{modules}', ApiController::class)->only(['index', 'store']);
-    Route::get('/{moduleSection}/{moduleGroup}/{modules}/{id}', [ApiController::class, 'show']);
-    Route::put('/{moduleSection}/{moduleGroup}/{modules}/{id}', [ApiController::class, 'update']);
-    Route::delete('/{moduleSection}/{moduleGroup}/{modules}/{id}', [ApiController::class, 'destroy']);
+    Route::apiResource('/{moduleSection}/{moduleGroup}/{modules}', \Formation\Http\Controllers\ApiController::class)->only(['index', 'store']);
+    Route::get('/{moduleSection}/{moduleGroup}/{modules}/{id}', [\Formation\Http\Controllers\ApiController::class, 'show']);
+    Route::put('/{moduleSection}/{moduleGroup}/{modules}/{id}', [\Formation\Http\Controllers\ApiController::class, 'update']);
+    Route::delete('/{moduleSection}/{moduleGroup}/{modules}/{id}', [\Formation\Http\Controllers\ApiController::class, 'destroy']);
 });

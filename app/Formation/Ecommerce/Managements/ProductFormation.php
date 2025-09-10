@@ -32,9 +32,9 @@ class ProductFormation
             $index
                 ->select(function (Select $select) {
                     $select->field('id')->hide();
-                    $select->field('name')->sortable()->highlight();
+                    $select->field('name')->sortable()->highlight()->lang(['en']);
                     $select->field('sku')->sortable();
-                    $select->field('category_id')->with('category')->reference('name')->sortable();
+                    $select->field('category_id')->with('category')->reference('name')->sortable()->lang(['en']);
                     $select->field('price')->sortable()->display('currency');
                     $select->field('stock')->sortable();
                     $select->field('status')->sortable()->display('badge');
@@ -51,9 +51,9 @@ class ProductFormation
                     $export->field('created_at');
                 })
                 ->search(function (Search $search) {
-                    $search->field('name');
+                    $search->field('name')->json();
                     $search->field('sku');
-                    $search->field('description');
+                    $search->field('description')->json();
                 })
                 ->filter(function (Filter $filter) {
                     $filter->text('name')->operator('like');
@@ -105,7 +105,8 @@ class ProductFormation
             $card->create('')->column(1)->group(function (Section $section) use ($object) {
                 $section->create('')->span(1)->column(2)->group(function (Column $column) use ($object) {
                     $column->text('name')->span(1)->autofocus()->group(function (Field $field) {
-                        $field->rules(['required', 'max:200']);
+                        $field->rules(['required']);
+                        $field->lang('en');
                     });
                     
                     $column->text('slug')->span(1)->group(function (Field $field) {
@@ -128,10 +129,12 @@ class ProductFormation
                         $field->option('active', 'Active');
                         $field->option('inactive', 'Inactive');
                         $field->rules(['required', 'in:active,inactive']);
+                        $field->value(function () { return 'active'; });
                     });
                     
                     $column->textarea('description')->span(2)->group(function (Field $field) {
                         $field->rules(['nullable']);
+                        $field->lang('en');
                     });
                     
                     $column->number('price')->span(1)->group(function (Field $field) {
@@ -142,6 +145,10 @@ class ProductFormation
                         $field->rules(['required', 'integer', 'min:0']);
                     });
                     
+                    // Product main image (S3)
+                    $column->file('image')->folderPath('products/')->span(2)->group(function (Field $field) {
+                        $field->rules(['nullable', 'mimes:jpeg,bmp,png,gif,svg', 'max:5120']);
+                    });
 
                     $column->preset('created_by')->default(Auth::id());
                 });
@@ -155,7 +162,8 @@ class ProductFormation
             $card->create('')->column(1)->group(function (Section $section) use ($object) {
                 $section->create('')->span(1)->column(2)->group(function (Column $column) use ($object) {
                     $column->text('name')->span(1)->autofocus()->group(function (Field $field) {
-                        $field->rules(['required', 'max:200']);
+                        $field->rules(['required']);
+                        $field->lang('en');
                     });
                     
                     $column->text('slug')->span(1)->group(function (Field $field) use ($object) {
@@ -182,6 +190,7 @@ class ProductFormation
                     
                     $column->textarea('description')->span(2)->group(function (Field $field) {
                         $field->rules(['nullable']);
+                        $field->lang('en');
                     });
                     
                     $column->number('price')->span(1)->group(function (Field $field) {
@@ -191,7 +200,10 @@ class ProductFormation
                     $column->number('stock')->span(1)->group(function (Field $field) {
                         $field->rules(['required', 'integer', 'min:0']);
                     });
-                    
+                    // Product main image (S3)
+                    $column->file('image')->folderPath('products/')->span(2)->group(function (Field $field) {
+                        $field->rules(['nullable', 'mimes:jpeg,bmp,png,gif,svg', 'max:5120']);
+                    });
                 });
             });
         });
@@ -210,6 +222,7 @@ class ProductFormation
                     $column->displayText('price')->span(1)->display('currency');
                     $column->displayText('stock')->span(1);
                     $column->displayText('status')->span(1)->display('badge');
+                    $column->file('image')->folderPath('products/')->span(2);
                     $column->displayText('created_at')->span(1);
                 });
             });

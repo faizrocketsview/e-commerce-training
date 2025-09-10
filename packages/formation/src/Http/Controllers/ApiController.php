@@ -4,6 +4,7 @@ namespace Formation\Http\Controllers;
 
 use Livewire\Component;
 use Formation\DataTable\WithDataTable;
+use Spatie\Translatable\HasTranslations;
 
 
 class ApiController extends Component
@@ -64,13 +65,32 @@ class ApiController extends Component
                             if ($field->type === 'preset')
                                 continue;
                             
-                            if(isset($attributes->{$field->name}))
-                                $this->editing->{$field->name} = $attributes->{$field->name};
+                            if(isset($attributes->{$field->name})) {
+                                $value = $attributes->{$field->name};
+                                // If field is translatable and a plain string was sent, mirror to both en and ms
+                                if ($this->isFieldTranslatable($field->name)) {
+                                    if (is_string($value)) {
+                                        $value = ['en' => $value, 'ms' => $value];
+                                    } elseif (is_object($value)) {
+                                        $value = (array) $value;
+                                        // Fill missing locales with whichever exists
+                                        if (!isset($value['en']) && isset($value['ms'])) $value['en'] = $value['ms'];
+                                        if (!isset($value['ms']) && isset($value['en'])) $value['ms'] = $value['en'];
+                                    }
+                                }
+                                $this->editing->{$field->name} = $value;
+                            }
                         }
         
-        $result['data']['attributes'] = $this->executeSave();
-
-        return $result;
+        try {
+            $result['data']['attributes'] = $this->executeSave();
+            return $result;
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => $e->getMessage() ?: 'The given data was invalid.',
+                'errors' => $this->formatValidationErrors($e->errors()),
+            ], 422);
+        }
     }
 
     /**
@@ -135,13 +155,40 @@ class ApiController extends Component
                             if ($field->type === 'preset')
                                 continue;
 
-                            if(isset($attributes->{$field->name}))
-                                $this->editing->{$field->name} = $attributes->{$field->name};
+                            if(isset($attributes->{$field->name})) {
+                                $value = $attributes->{$field->name};
+                                if ($this->isFieldTranslatable($field->name)) {
+                                    if (is_string($value)) {
+                                        $value = ['en' => $value, 'ms' => $value];
+                                    } elseif (is_object($value)) {
+                                        $value = (array) $value;
+                                        if (!isset($value['en']) && isset($value['ms'])) $value['en'] = $value['ms'];
+                                        if (!isset($value['ms']) && isset($value['en'])) $value['ms'] = $value['en'];
+                                    }
+                                }
+                                $this->editing->{$field->name} = $value;
+                            }
                         }
                         
-        $result['data']['attributes'] = $this->executeSave();
+        try {
+            $result['data']['attributes'] = $this->executeSave();
+            return $result;
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => $e->getMessage() ?: 'The given data was invalid.',
+                'errors' => $this->formatValidationErrors($e->errors()),
+            ], 422);
+        }
+    }
 
-        return $result;
+    /**
+     * Validation rules for API endpoints.
+     * Force API to validate translatable fields on the root key (e.g., editing.name)
+     * and delegate to the shared module rules generator to keep behavior consistent.
+     */
+    public function rules()
+    {
+        return $this->getModuleRules();
     }
 
     /**
@@ -158,5 +205,49 @@ class ApiController extends Component
 
         $this->item_to_be_deleted = $id;
         return $this->executeDestroy();
+    }
+
+    private function isFieldTranslatable(string $fieldName): bool
+    {
+        try {
+            $modelClass = $this->getModelProperty();
+            if (!class_exists($modelClass)) return false;
+            if (!in_array(HasTranslations::class, class_uses_recursive($modelClass))) return false;
+            $model = app($modelClass);
+            return method_exists($model, 'isTranslatableAttribute') && $model->isTranslatableAttribute($fieldName);
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    private function formatValidationErrors(array $errors): array
+    {
+        // Transform flat keys like 'editing.name.en' into nested array under 'editing' key
+        $grouped = [];
+        foreach ($errors as $key => $messages) {
+            $segments = explode('.', $key);
+            // Ensure top-level 'editing' grouping as expected by API clients/tests
+            if ($segments[0] !== 'editing') {
+                // keep non-editing keys as-is
+                $grouped[$key] = $messages;
+                continue;
+            }
+
+            // Build nested structure under errors['editing'][...]
+            $ref =& $grouped['editing'];
+            for ($i = 1; $i < count($segments); $i++) {
+                $segment = $segments[$i];
+                if (!isset($ref[$segment])) {
+                    $ref[$segment] = [];
+                }
+                $ref =& $ref[$segment];
+            }
+
+            // Assign messages (ensure array of strings)
+            $ref = $messages;
+            unset($ref); // break reference
+        }
+
+        return $grouped;
     }
 }

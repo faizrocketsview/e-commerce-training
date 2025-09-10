@@ -44,6 +44,33 @@ class Resource extends Component
             }
         }
         
+        // Ensure translated fields have nested rules (e.g., editing.name.en)
+        try {
+            $modelClass = $this->getModelProperty();
+            $modelInstance = app($modelClass);
+            foreach ($this->getFormProperty()->items as $tab) {
+                foreach ($tab->items as $card) {
+                    foreach ($card->items as $section) {
+                        foreach ($section->items as $column) {
+                            foreach ($column->items as $field) {
+                                if ($field->type === 'preset') continue;
+                                if (method_exists($modelInstance, 'isTranslatableAttribute') &&
+                                    in_array(\Spatie\Translatable\HasTranslations::class, class_uses_recursive($modelClass)) &&
+                                    $modelInstance->isTranslatableAttribute($field->name)) {
+                                    $lang = $field->lang ?? (\Illuminate\Support\Facades\App::getFallbackLocale() ?: 'en');
+                                    $rules['editing.'.$field->name.'.'.$lang] = $field->rules;
+                                    // Also accept plain string (API convenience): treat it as valid
+                                    $rules['editing.'.$field->name] = ['nullable'];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            // silent; fall back to existing rules
+        }
+        
         return $rules;
     }
 

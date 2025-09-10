@@ -20,6 +20,7 @@ class Order extends Model
         'discount',
         'total',
         'total_price',
+        'attachments',
         'placed_at',
         'created_by',
         'updated_by',

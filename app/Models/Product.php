@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Formation\DataTable\WithTranslation;
 
 class Product extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, WithTranslation;
 
     protected $fillable = [
         'category_id',
@@ -18,6 +19,7 @@ class Product extends Model
         'description',
         'price',
         'stock',
+        'image',
         'is_active',
         'status',
         'created_by',
@@ -26,6 +28,9 @@ class Product extends Model
         'deleted_token',
         'partition_created_at',
     ];
+
+    // Declare translatable attributes
+    public $translatable = ['name', 'description'];
 
     protected $attributes = [
         'deleted_token' => null,

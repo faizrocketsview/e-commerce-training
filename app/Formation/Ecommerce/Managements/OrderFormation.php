@@ -167,7 +167,10 @@ class OrderFormation
                     $column->number('total')->span(1)->readonly()->group(function (Field $field) {
                         $field->rules(['required', 'numeric', 'min:0']);
                     });
-                    
+                    // Order level file attachments (S3)
+                    $column->file('attachments')->folderPath('orders/')->span(1)->group(function (Field $field) {
+                        $field->rules(['nullable', 'mimes:jpeg,bmp,png,gif,svg,pdf,doc,docx,xls,xlsx,csv', 'max:10240']);
+                    });
                     $column->preset('created_by')->span(1)->default(Auth::id());
                 });
             });
@@ -292,6 +295,7 @@ class OrderFormation
                     $column->displayText('discount')->span(1)->display('currency');
                     $column->displayText('total')->span(1)->display('currency');
                     $column->displayText('total_price')->span(1)->display('currency');
+                    $column->file('attachments')->folderPath('orders/')->span(2);
                     $column->displayText('placed_at')->span(1);
                     $column->displayText('created_at')->span(1);
                 });

@@ -31,7 +31,7 @@ class CategoryFormation
             $index
                 ->select(function (Select $select) {
                     $select->field('id')->hide();
-                    $select->field('name')->sortable()->highlight();
+                    $select->field('name')->sortable()->highlight()->lang(['en']);
                     $select->field('type')->sortable();
                     $select->field('status')->sortable()->localize();
                     $select->field('slug')->sortable();
@@ -46,7 +46,7 @@ class CategoryFormation
                     $export->field('created_at');
                 })
                 ->search(function (Search $search) {
-                    $search->field('name');
+                    $search->field('name')->json();
                     $search->field('type');
                     $search->field('slug');
                 })
@@ -96,7 +96,8 @@ class CategoryFormation
             $card->create('')->column(1)->group(function (Section $section) use ($object) {
                 $section->create('')->span(1)->column(2)->group(function (Column $column) use ($object) {
                     $column->text('name')->span(1)->autofocus()->group(function (Field $field) {
-                        $field->rules(['required', 'max:150']);
+                        $field->rules(['required']);
+                        $field->lang('en');
                     });
                     
                     $column->text('type')->span(1)->group(function (Field $field) {
@@ -107,6 +108,7 @@ class CategoryFormation
                         $field->option('active', 'Active');
                         $field->option('inactive', 'Inactive');
                         $field->rules(['required', 'in:active,inactive']);
+                        $field->value(function () { return 'active'; });
                     });
                     
                     $column->text('slug')->span(1)->group(function (Field $field) {
@@ -136,6 +138,7 @@ class CategoryFormation
                         $field->option('active', 'Active');
                         $field->option('inactive', 'Inactive');
                         $field->rules(['required', 'in:active,inactive']);
+                        $field->value(function () { return 'active'; });
                     });
                     
                     $column->text('slug')->span(1)->group(function (Field $field) use ($object) {

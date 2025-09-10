@@ -15,6 +15,7 @@ use Illuminate\Validation\Rules\File;
 use Livewire\WithPagination;
 use Maatwebsite\Excel\HeadingRowImport;
 use Livewire\TemporaryUploadedFile;
+use Illuminate\Support\Facades\App;
 
 trait WithDataTable
 {
@@ -236,8 +237,16 @@ trait WithDataTable
                                         }
                                     }
                                 } elseif ($this->isModelTranslatable($this->editing, $field->name)) {
-                                    if(!isset($field->lang)) $field->lang = App::getFallbackLocale();
-                                    $rules["editing.$field->name.$field->lang"] = $field->rules;
+                                    // For API requests, validate the root key; web validates specific locale
+                                    $isApi = \Illuminate\Support\Facades\Request::is('api/*');
+                                    if ($isApi) {
+                                        $rules["editing.$field->name"] = $field->rules;
+                                        // Make nested locale keys optional to avoid strict 'editing.name.en' requirement
+                                        $rules["editing.$field->name.*"] = ['nullable'];
+                                    } else {
+                                        if(!isset($field->lang)) $field->lang = App::getFallbackLocale() ?: 'en';
+                                        $rules["editing.$field->name.$field->lang"] = $field->rules;
+                                    }
                                 } else {
                                     $rules['editing.'.$field->name] = $field->rules;
                                 }
@@ -567,6 +576,14 @@ trait WithDataTable
                                             $value = explode('|', $value);
                                         }
                                         $this->editing->$fieldName = array_filter($value);
+                                    }
+                                }
+
+                                // Normalize translatable fields: accept plain string and mirror to en/ms
+                                if ($this->isModelTranslatable($this->editing, $fieldName))
+                                {
+                                    if (isset($this->editing->$fieldName) && is_string($this->editing->$fieldName)) {
+                                        $this->editing->$fieldName = ['en' => $this->editing->$fieldName, 'ms' => $this->editing->$fieldName];
                                     }
                                 }
 
@@ -1428,7 +1445,21 @@ trait WithDataTable
                                     }
                                 }
                                 else {
-                                    $rules['editing.'.$field->name] = $field->rules;
+                                    // Handle translatable model fields (web vs API)
+                                    $modelInstance = app($this->getModelProperty());
+                                    if ($this->isModelTranslatable($modelInstance, $field->name)) {
+                                        $isApi = \Illuminate\Support\Facades\Request::is('api/*');
+                                        if ($isApi) {
+                                            // For API, validate the root key (e.g., editing.name)
+                                            $rules['editing.'.$field->name] = $field->rules;
+                                        } else {
+                                            // For web, validate specific locale (e.g., editing.name.en)
+                                            $lang = $field->lang ?? (\Illuminate\Support\Facades\App::getFallbackLocale() ?: 'en');
+                                            $rules['editing.'.$field->name.'.'.$lang] = $field->rules;
+                                        }
+                                    } else {
+                                        $rules['editing.'.$field->name] = $field->rules;
+                                    }
                                 }
                             }
         }
