@@ -179,12 +179,7 @@ return [
      * These will be used by the permission:upsert command
      */
     'permissions' => [
-        // Navigation permissions for side menu
-        'ecommerce.managements.categories:show',
-        'ecommerce.managements.products:show',
-        'ecommerce.managements.orders:show',
-        'ecommerce.managements.items:show',
-        'ecommerce.managements.users:show',
+        // Navigation permissions now rely on ':read' access; ':show' removed
         
         // Product Categories
         'ecommerce.managements.categories:create',

@@ -139,21 +139,22 @@ class UserFormation
 
             $card->create('Permissions')->column(1)->group(function (Section $section) use ($object) {
                 $section->create('')->span(1)->column(2)->group(function (Column $column) use ($object) {
-                    // Define the modules we want to show permissions for
-                    $modules = ['categories', 'products', 'orders', 'items', 'users'];
+                    // Define the modules to show permissions for
+                    $modules = ['categories', 'products', 'orders', 'users'];
                     
                     foreach ($modules as $module) {
                         $column->checkboxButtonMultiple('permissions_' . $module)->span(1)->column(2)->group(function (Field $field) use ($module) {
-                            // Get permissions for this specific module
+                            // Get permissions for this specific module and exclude deprecated ':show'
                             $modulePermissions = Permission::where('name', 'like', "ecommerce.managements.{$module}:%")
-                                ->where('name', 'not like', '%:edit') // Skip edit permissions to avoid duplicates
+                                ->where('name', 'not like', '%:edit')
+                                ->where('name', 'not like', '%:show')
                                 ->get();
-                            
+
                             foreach ($modulePermissions as $permission) {
                                 $permissionName = explode(":", $permission->name)[1];
                                 $field->option($permission->id, ucfirst($permissionName));
                             }
-                            
+
                             // Set default empty array
                             $field->value(function() { return []; });
                             // Add validation rules for the permission field
@@ -202,21 +203,22 @@ class UserFormation
             // Add permissions section for edit form
             $card->create('Permissions')->column(1)->group(function (Section $section) use ($object) {
                 $section->create('')->span(1)->column(2)->group(function (Column $column) use ($object) {
-                    // Define the modules we want to show permissions for
-                    $modules = ['categories', 'products', 'orders', 'items', 'users'];
+                    // Define the modules to show permissions for
+                    $modules = ['categories', 'products', 'orders', 'users'];
                     
                     foreach ($modules as $module) {
                         $column->checkboxButtonMultiple('permissions_' . $module)->span(1)->column(2)->group(function (Field $field) use ($module) {
-                            // Get permissions for this specific module
+                            // Get permissions for this specific module and exclude deprecated ':show'
                             $modulePermissions = Permission::where('name', 'like', "ecommerce.managements.{$module}:%")
-                                ->where('name', 'not like', '%:edit') // Skip edit permissions to avoid duplicates
+                                ->where('name', 'not like', '%:edit')
+                                ->where('name', 'not like', '%:show')
                                 ->get();
-                            
+
                             foreach ($modulePermissions as $permission) {
                                 $permissionName = explode(":", $permission->name)[1];
                                 $field->option($permission->id, ucfirst($permissionName));
                             }
-                            
+
                             // Set default empty array
                             $field->value(function() { return []; });
                             // Add validation rules for the permission field

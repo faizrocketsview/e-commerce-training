@@ -17,10 +17,10 @@
                             </x-side-navigation-menu.module-group>
                         </x-side-navigation-menu.module-section>
 
-                        @canany(['ecommerce.managements.categories:show','ecommerce.managements.products:show','ecommerce.managements.orders:show','ecommerce.managements.items:show','ecommerce.managements.users:show'])
+                        @canany(['ecommerce.managements.categories:read','ecommerce.managements.products:read','ecommerce.managements.orders:read','ecommerce.managements.items:read','ecommerce.managements.users:read'])
                         <x-side-navigation-menu.module-section name="ecommerce">
 
-                            @canany(['ecommerce.managements.categories:show','ecommerce.managements.products:show','ecommerce.managements.orders:show','ecommerce.managements.items:show','ecommerce.managements.users:show'])
+                            @canany(['ecommerce.managements.categories:read','ecommerce.managements.products:read','ecommerce.managements.orders:read','ecommerce.managements.items:read','ecommerce.managements.users:read'])
                             <x-side-navigation-menu.module-group sectionname="ecommerce" name="managements">
                                 <x-slot name="icon">
                                     <svg class="mr-4 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -29,19 +29,19 @@
                                 </x-slot>
 
                                                                 
-                                @can('ecommerce.managements.users:show')
+                                @can('ecommerce.managements.users:read')
                                 <x-side-navigation-menu.module sectionname="ecommerce" groupname="managements" name="users" href="/ecommerce/managements/users" />
                                 @endcan
 
-                                @can('ecommerce.managements.categories:show')
+                                @can('ecommerce.managements.categories:read')
                                 <x-side-navigation-menu.module sectionname="ecommerce" groupname="managements" name="categories" href="/ecommerce/managements/categories" />
                                 @endcan
                                 
-                                @can('ecommerce.managements.products:show')
+                                @can('ecommerce.managements.products:read')
                                 <x-side-navigation-menu.module sectionname="ecommerce" groupname="managements" name="products" href="/ecommerce/managements/products" />
                                 @endcan
                                 
-                                @can('ecommerce.managements.orders:show')
+                                @can('ecommerce.managements.orders:read')
                                 <x-side-navigation-menu.module sectionname="ecommerce" groupname="managements" name="orders" href="/ecommerce/managements/orders" />
                                 @endcan
                                
