@@ -13,7 +13,8 @@ class AssignAdminPermissionsSeeder extends Seeder
      * Run the database seeds.
      */
     public function run(): void
-    {
+    {;
+
         // Find the admin user
         $admin = User::where('email', 'admin@example.com')->first();
         

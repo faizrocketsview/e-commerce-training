@@ -259,6 +259,10 @@ class OrderFormation
                     $column->number('total')->span(1)->readonly()->group(function (Field $field) {
                         $field->rules(['required', 'numeric', 'min:0']);
                     });
+                    // Order level file attachments (S3)
+                    $column->file('attachments')->folderPath('orders/')->span(1)->group(function (Field $field) {
+                        $field->rules(['nullable', 'mimes:jpeg,bmp,png,gif,svg,pdf,doc,docx,xls,xlsx,csv', 'max:10240']);
+                    });
                 });
             });
 
