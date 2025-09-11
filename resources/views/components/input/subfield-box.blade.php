@@ -1,18 +1,30 @@
 <div class="mt-2">
 @php
+    // Ensure subClassItems is always defined
+    if (!isset($subClassItems)) {
+        $subClassItems = [];
+    }
+    
+    // Ensure the specific field key exists in subClassItems
+    if (isset($field->with) && !isset($subClassItems[$field->with])) {
+        $subClassItems[$field->with] = [];
+    }
+    
     if($type == 'create' || $type == 'edit') {
-        if(isset($editedSubClassFields)){
+        if(isset($editedSubClassFields) && isset($editedSubClassFields[$field->with])){
             $subClassFields = $editedSubClassFields[$field->with];
-        }else{
+        }elseif(isset($editing->{$field->with})){
             $subClassFields = $editing->{$field->with};
+        }else{
+            $subClassFields = [];
         }
     }else {
-        $subClassFields = $editing->{$field->with};
+        $subClassFields = isset($editing->{$field->with}) ? $editing->{$field->with} : [];
     }
 @endphp
 
 @if(isset($field->with))
-@if((isset($subClassItems[$field->with]) && sizeof($subClassItems[$field->with]) > 0) || (isset($subClassFields) && sizeof($subClassFields) > 0))
+@if((isset($subClassItems) && isset($subClassItems[$field->with]) && sizeof($subClassItems[$field->with]) > 0) || (isset($subClassFields) && sizeof($subClassFields) > 0))
 @foreach($subClassFields as $key => $editing_subfield)
     @if($type == 'create' || $type == 'edit')
     <div class="text-gray-400 hover:text-gray-600 bg-gray-100 {{ $key == 0 ? 'rounded-t-lg' : '' }} px-4 sm:px-6 pt-2 sm:pt-4">
@@ -135,7 +147,7 @@
 
 @endforeach
 
-@if(isset($subClassItems[$field->with]))
+@if(isset($subClassItems) && isset($subClassItems[$field->with]))
     @if(isset($subClassFields) && sizeof($subClassFields) > 0)
     <div>
         <div class="w-full border-t border-gray-300"></div>
@@ -152,7 +164,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-{{ $field->column }} gap-6 bg-gray-100 {{ isset($subClassItems[$field->with]) && sizeof($subClassItems[$field->with]) == $key + 1 ? 'rounded-b-lg' : '' }} px-4 sm:px-6 pb-10">
+    <div class="grid grid-cols-1 sm:grid-cols-{{ $field->column }} gap-6 bg-gray-100 {{ isset($subClassItems) && isset($subClassItems[$field->with]) && sizeof($subClassItems[$field->with]) == $key + 1 ? 'rounded-b-lg' : '' }} px-4 sm:px-6 pb-10">
 
         @foreach($field->items as $subfield)
             @if ($subfield->type != 'preset') 

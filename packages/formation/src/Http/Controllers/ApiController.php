@@ -56,6 +56,10 @@ class ApiController extends Component
         $this->editing = $this->model::make();
         $attributes = json_decode(request()->getContent())->data->attributes;
 
+        // Initialize subClassItems for orderItems
+        $this->subClassItems = [];
+        $this->subClassItems['orderItems'] = [];
+
         foreach ($this->form->items as $tab)
             foreach ($tab->items as $card)
                 foreach ($card->items as $section)
@@ -64,6 +68,14 @@ class ApiController extends Component
                         {
                             if ($field->type === 'preset')
                                 continue;
+                            
+                            // Handle subfield (orderItems)
+                            if ($field->type === 'subfieldBox' && $field->with === 'orderItems') {
+                                if (isset($attributes->{$field->name}) && is_array($attributes->{$field->name})) {
+                                    $this->subClassItems['orderItems'] = $attributes->{$field->name};
+                                }
+                                continue;
+                            }
                             
                             if(isset($attributes->{$field->name})) {
                                 $value = $attributes->{$field->name};
@@ -83,8 +95,14 @@ class ApiController extends Component
                         }
         
         try {
-            $result['data']['attributes'] = $this->executeSave();
-            return $result;
+            $this->executeSave();
+            return response()->json([
+                'message' => 'Order created successfully.',
+                'data' => [
+                    'id' => $this->editing->id,
+                    'attributes' => $this->editing->fresh()
+                ]
+            ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'message' => $e->getMessage() ?: 'The given data was invalid.',
@@ -146,6 +164,10 @@ class ApiController extends Component
         $this->editing = $this->model::find($id);
         $attributes = json_decode(request()->getContent())->data->attributes;
 
+        // Initialize subClassItems for orderItems
+        $this->subClassItems = [];
+        $this->subClassItems['orderItems'] = [];
+
         foreach ($this->form->items as $tab)
             foreach ($tab->items as $card)
                 foreach ($card->items as $section)
@@ -154,6 +176,14 @@ class ApiController extends Component
                         {
                             if ($field->type === 'preset')
                                 continue;
+
+                            // Handle subfield (orderItems)
+                            if ($field->type === 'subfieldBox' && $field->with === 'orderItems') {
+                                if (isset($attributes->{$field->name}) && is_array($attributes->{$field->name})) {
+                                    $this->subClassItems['orderItems'] = $attributes->{$field->name};
+                                }
+                                continue;
+                            }
 
                             if(isset($attributes->{$field->name})) {
                                 $value = $attributes->{$field->name};
@@ -171,8 +201,29 @@ class ApiController extends Component
                         }
                         
         try {
-            $result['data']['attributes'] = $this->executeSave();
-            return $result;
+            // Check if user is authenticated
+            if (!auth()->check()) {
+                return response()->json([
+                    'message' => 'Unauthenticated.',
+                ], 401);
+            }
+            
+            // Check authorization
+            $user = auth()->user();
+            if (!$user->can('update', [$this->editing, $this->moduleSection.'.'.$this->moduleGroup.'.'.$this->module])) {
+                return response()->json([
+                    'message' => 'This action is unauthorized.',
+                ], 403);
+            }
+            
+            $this->executeSave();
+            return response()->json([
+                'message' => 'Order updated successfully.',
+                'data' => [
+                    'id' => $this->editing->id,
+                    'attributes' => $this->editing->fresh()
+                ]
+            ], 200);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'message' => $e->getMessage() ?: 'The given data was invalid.',
@@ -203,8 +254,49 @@ class ApiController extends Component
         $this->moduleGroup = $moduleGroup;
         $this->module = $module;
 
-        $this->item_to_be_deleted = $id;
-        return $this->executeDestroy();
+        try {
+            // Find the order to delete
+            $order = $this->model::findOrFail($id);
+            
+            // Check if user is authenticated
+            if (!auth()->check()) {
+                return response()->json([
+                    'message' => 'Unauthenticated.',
+                ], 401);
+            }
+            
+            // Check authorization using the policy directly
+            $user = auth()->user();
+            if (!$user->can('delete', [$order, $this->moduleSection.'.'.$this->moduleGroup.'.'.$this->module])) {
+                return response()->json([
+                    'message' => 'This action is unauthorized.',
+                ], 403);
+            }
+            
+            // Perform soft delete
+            $order->update([
+                'deleted_at' => now(),
+                'deleted_token' => \Illuminate\Support\Str::uuid(),
+            ]);
+            
+            return response()->json([
+                'message' => 'Order deleted successfully.',
+                'data' => [
+                    'id' => $order->id,
+                    'deleted_at' => $order->deleted_at
+                ]
+            ], 200);
+            
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Order not found.',
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to delete order.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     private function isFieldTranslatable(string $fieldName): bool

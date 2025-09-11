@@ -44,6 +44,16 @@
                                 @can('ecommerce.managements.orders:read')
                                 <x-side-navigation-menu.module sectionname="ecommerce" groupname="managements" name="orders" href="/ecommerce/managements/orders" />
                                 @endcan
+
+                                {{-- Catalog custom frontend --}}
+                                <x-side-navigation-menu.module-group sectionname="catalog" name="catalog">
+                                    <x-slot name="icon">
+                                        <svg class="mr-4 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5l7.5-4.5L18 7.5m-15 0L3 18l7.5 4.5M3 7.5l7.5 4.5M10.5 22.5L21 16.5V6m-10.5 6L21 6" />
+                                        </svg>
+                                    </x-slot>
+                                    <x-side-navigation-menu.module sectionname="catalog" groupname="ecommerce" name="products" href="/catalog/ecommerce/managements/products" />
+                                </x-side-navigation-menu.module-group>
                                
                             </x-side-navigation-menu.module-group>
                             @endcanany

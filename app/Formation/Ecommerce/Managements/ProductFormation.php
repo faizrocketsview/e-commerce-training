@@ -37,6 +37,8 @@ class ProductFormation
                     $select->field('category_id')->with('category')->reference('name')->sortable()->lang(['en']);
                     $select->field('price')->sortable()->display('currency');
                     $select->field('stock')->sortable();
+                    $select->field('image')->hide(); // Include image field for catalog display
+                    $select->field('description')->hide(); // Include description for catalog display
                     $select->field('status')->sortable()->display('badge');
                     $select->field('created_at')->sortable()->display('md')->sortByDefault('desc');
                 })
@@ -47,6 +49,8 @@ class ProductFormation
                     $export->field('category_id')->with('category')->reference('name');
                     $export->field('price');
                     $export->field('stock');
+                    $export->field('image');
+                    $export->field('description');
                     $export->field('status');
                     $export->field('created_at');
                 })

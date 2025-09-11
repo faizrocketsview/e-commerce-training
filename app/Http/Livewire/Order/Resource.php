@@ -19,8 +19,31 @@ class Resource extends BaseResource
 
         // Ensure subClassItems is always initialized to avoid PropertyNotFound
         if (!isset($this->subClassItems) || !is_array($this->subClassItems)) {
-            $this->subClassItems = ['orderItems' => []];
+            $this->subClassItems = [];
         }
+        
+        // Always ensure orderItems key exists
+        if (!isset($this->subClassItems['orderItems'])) {
+            $this->subClassItems['orderItems'] = [];
+        }
+    }
+
+    /**
+     * Override render to ensure subClassItems is always available
+     */
+    public function render()
+    {
+        // Ensure subClassItems is always initialized before rendering
+        if (!isset($this->subClassItems) || !is_array($this->subClassItems)) {
+            $this->subClassItems = [];
+        }
+        
+        // Always ensure orderItems key exists
+        if (!isset($this->subClassItems['orderItems'])) {
+            $this->subClassItems['orderItems'] = [];
+        }
+        
+        return parent::render();
     }
 
     /**
@@ -230,8 +253,15 @@ class Resource extends BaseResource
     {
         parent::executeCreate();
         
-        // Initialize order items as empty array
-        $this->subClassItems['orderItems'] = [];
+        // Ensure subClassItems is properly initialized
+        if (!isset($this->subClassItems) || !is_array($this->subClassItems)) {
+            $this->subClassItems = [];
+        }
+        
+        // Always ensure orderItems key exists and is an array
+        if (!isset($this->subClassItems['orderItems']) || !is_array($this->subClassItems['orderItems'])) {
+            $this->subClassItems['orderItems'] = [];
+        }
     }
 
     /**

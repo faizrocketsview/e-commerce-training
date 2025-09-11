@@ -186,7 +186,6 @@ class OrderFormation
                             }
                             $subField->rules(['required', 'exists:products,id']);
                         });
-                    
                         
                         $field->number('quantity')->span(1)->group(function (Field $subField) {
                             $subField->rules(['required', 'integer', 'min:1', 'max:9999']);

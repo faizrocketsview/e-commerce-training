@@ -11,6 +11,7 @@ return [
     'products' => 'Products',
     'orders' => 'Orders',
     'users' => 'Users',
+    'catalog' => 'Catalog',
 
     'section-1' => 'Section 1',
     'module-1' => 'Module 1',
