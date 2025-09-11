@@ -13,6 +13,7 @@ use App\Actions\Formation\Formation;
 use App\Actions\Formation\Index\Index;
 use App\Actions\Formation\Index\Select;
 use App\Actions\Formation\Index\Export;
+use App\Actions\Formation\Index\Import;
 use App\Actions\Formation\Index\Search;
 use App\Actions\Formation\Index\Filter;
 use App\Actions\Formation\Index\Action;
@@ -21,6 +22,7 @@ use App\Actions\Formation\Index\ItemAction;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class ProductFormation
 {
@@ -42,6 +44,46 @@ class ProductFormation
                     $select->field('status')->sortable()->display('badge');
                     $select->field('created_at')->sortable()->display('md')->sortByDefault('desc');
                 })
+                ->import(function (Import $import){
+                    // // Get active product categories for validation
+                    // $activeCategories = ProductCategory::where('status', 'active')->pluck('id')->toArray();
+                    
+                    // // Basic product information
+                    // $import->label('name')->rules(['required', 'string', 'max:255']);
+                    // $import->label('sku')->rules(['required', 'string', 'max:64', 'unique:products,sku']);
+                    // $import->label('slug')->rules(['required', 'string', 'max:220', 'unique:products,slug']);
+                    
+                    // // Category validation with active categories only
+                    // $import->label('category_id')->rules(['nullable', 'exists:product_categories,id', 'in:'.implode(',', $activeCategories)]);
+                    
+                    // // Pricing and inventory
+                    // $import->label('price')->rules(['required', 'numeric', 'min:0']);
+                    // $import->label('stock')->rules(['required', 'integer', 'min:0']);
+                    
+                    // // Product details
+                    // $import->label('description')->rules(['nullable', 'string']);
+                    // $import->label('image')->rules(['nullable', 'string', 'max:500']); // Image path/URL
+                    
+                    // // Status with validation
+                    // $import->label('status')->rules(['required', 'in:active,inactive']);
+                    
+                    // // Preset values for new products
+                    // $import->label('created_by')->preset(Auth::id());
+                    // $import->label('updated_by')->preset(Auth::id());
+                    
+                    // // Sample file for import template
+                    // $import->sampleFile('samples/sample-product-import.csv');
+
+                    $import->field('id');
+                    $import->field('name');
+                    $import->field('sku');
+                    $import->field('slug');
+                    $import->field('price');
+                    $import->field('stock');
+                    $import->field('description');
+                    $import->field('status');
+                })
+                
                 ->export(function (Export $export) {
                     $export->field('id');
                     $export->field('name');
@@ -77,6 +119,7 @@ class ProductFormation
                 ->action(function (Action $action) {
                     $action->operation('create');
                     $action->operation('export');
+                    $action->operation('import');
                     $action->operation('bulkDelete')->danger();
                 })
                 ->itemAction(function (ItemAction $itemAction) {

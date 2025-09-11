@@ -8,6 +8,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Maatwebsite\Excel\Concerns\RegistersEventListeners;
 use Maatwebsite\Excel\Concerns\RemembersChunkOffset;
@@ -59,6 +60,68 @@ class WithImport extends Component implements ToModel, SkipsOnFailure, SkipsOnEr
         }
     }
 
+    /**
+     * Check if running in local environment
+     */
+    private function isLocalEnvironment(): bool
+    {
+        return app()->environment('local', 'testing');
+    }
+
+    /**
+     * Get chunk size for processing
+     */
+    public function chunkSize(): int
+    {
+        if ($this->isLocalEnvironment()) {
+            return min($this->chunkSize, 100);
+        }
+        return $this->chunkSize;
+    }
+
+    /**
+     * Determine if the job should be queued
+     */
+    public function shouldQueue(): bool
+    {
+        if ($this->isLocalEnvironment()) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Get the queue name
+     */
+    public function onQueue(): string
+    {
+        return config('queue.default', 'sync');
+    }
+
+    /**
+     * Get the number of times the job may be attempted
+     */
+    public function tries(): int
+    {
+        return 3;
+    }
+
+    /**
+     * Get the number of seconds to wait before retrying the job
+     */
+    public function backoff(): int
+    {
+        return 30;
+    }
+
+    /**
+     * Get the maximum number of seconds the job can run
+     */
+    public function timeout(): int
+    {
+        return 300;
+    }
+
     // public function rules(): array
     // {
     //     return $this->rules;
@@ -69,7 +132,7 @@ class WithImport extends Component implements ToModel, SkipsOnFailure, SkipsOnEr
         $mappedRow = [];
 
         if ($this->type == 'edit'){
-            Auth::login($this->user);
+            Auth::setUser($this->user);
 
             if (!array_key_exists("id", $row)) {
                 throw new Exception("Column 'id' not found.");
@@ -122,9 +185,14 @@ class WithImport extends Component implements ToModel, SkipsOnFailure, SkipsOnEr
     public function model(array $row)
     {
         $currentRowNumber = $this->getRowNumber();
-
+        
         try {
-            Auth::login($this->user);
+            // Memory management for local environments
+            if (memory_get_usage() > (memory_get_peak_usage() * 0.8)) {
+                gc_collect_cycles();
+            }
+            
+            Auth::setUser($this->user);
             $this->form = $this->getFormProperty();
             
             $this->transform($row);
@@ -137,6 +205,16 @@ class WithImport extends Component implements ToModel, SkipsOnFailure, SkipsOnEr
                 'total_inserted' => $totalInserted + 1,
             ]);
         } catch (\Exception $e) {
+            Log::error('Import error in row ' . $currentRowNumber, [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+                'import_id' => $this->import->id,
+                'user_id' => $this->user->id,
+                'environment' => app()->environment()
+            ]);
+            
             if ($e instanceof AuthorizationException) {
                 $this->importErrorTable::create([
                     $this->importIdColumn => $this->import->id,
@@ -157,6 +235,16 @@ class WithImport extends Component implements ToModel, SkipsOnFailure, SkipsOnEr
                 ]);
             }
         } catch (\Throwable $t) {
+            Log::error('Import throwable error in row ' . $currentRowNumber, [
+                'error' => $t->getMessage(),
+                'file' => $t->getFile(),
+                'line' => $t->getLine(),
+                'trace' => $t->getTraceAsString(),
+                'import_id' => $this->import->id,
+                'user_id' => $this->user->id,
+                'environment' => app()->environment()
+            ]);
+            
             if ($t instanceof UniqueConstraintViolationException) {
                 $this->importErrorTable::create([
                     $this->importIdColumn => $this->import->id,
@@ -255,8 +343,4 @@ class WithImport extends Component implements ToModel, SkipsOnFailure, SkipsOnEr
         ]);
     }
 
-    public function chunkSize(): int
-    {
-        return $this->chunkSize;
-    }
 }

@@ -30,6 +30,8 @@ Route::middleware([
     // Catalog (custom frontend) using Formation data table under ecommerce/managements/products
     Route::get('/catalog/ecommerce/managements/products', CatalogResource::class);
 
+    // Specific route for products module to use Product Resource
+    Route::get('/ecommerce/managements/products', App\Http\Livewire\Product\Resource::class);
     
     // Specific route for users module to use User Resource
     Route::get('/ecommerce/managements/users', App\Http\Livewire\User\Resource::class);

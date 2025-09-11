@@ -278,14 +278,49 @@ class FileUploader extends Component
 
         return response()->streamDownload(function() use ($headers, $data){
             echo implode(',', $headers);
+            echo "\n";
+            
             if(isset($data)){
-                echo "\n";
+                // Use existing data from database
+                $datas = [];
                 foreach($headers as $columnName){
                     $datas[] = isset($data->$columnName) ? $data->$columnName : '';
                 }
                 echo implode(',', $datas);
+            } else {
+                // Generate sample data when no data exists
+                $datas = [];
+                foreach($headers as $columnName){
+                    $datas[] = $this->generateSampleValue($columnName);
+                }
+                echo implode(',', $datas);
             }
         }, collect(explode('\\', $this->model))->last().date('YmdHis').'.csv');
+    }
+
+    /**
+     * Generate sample values for different column types
+     */
+    private function generateSampleValue($columnName)
+    {
+        $sampleData = [
+            'id' => '100',
+            'name' => 'Sample Product Name',
+            'sku' => 'SKU001',
+            'slug' => 'sample-product-slug',
+            'category_id' => '1',
+            'price' => '99.99',
+            'stock' => '100',
+            'description' => 'This is a sample product description',
+            'image' => 'products/sample.jpg',
+            'status' => 'active',
+            'created_by' => '1',
+            'updated_by' => '1',
+            'created_at' => now()->format('Y-m-d H:i:s'),
+            'updated_at' => now()->format('Y-m-d H:i:s'),
+        ];
+
+        return $sampleData[$columnName] ?? 'Sample Value';
     }
 
     public function updateFiles($newFiles)

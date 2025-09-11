@@ -16,7 +16,7 @@ class ProductSeeder extends Seeder
     {
         // Create a sample category if it doesn't exist
         $category = ProductCategory::firstOrCreate(
-            ['name' => 'Electronics'],
+            ['slug' => 'electronics'],
             [
                 'name' => 'Electronics',
                 'slug' => 'electronics',

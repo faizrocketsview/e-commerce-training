@@ -1389,6 +1389,8 @@ trait WithDataTable
 
     public function getImportColumns()
     {
+        $columns = []; // Initialize the $columns array
+        
         foreach ($this->getImportAttributes()->items as $item) {
             $columns[$item->name] = $item->label;
         }

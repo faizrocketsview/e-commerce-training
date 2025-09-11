@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use App\Models\User;
-// Explicitly use fully-qualified controller to avoid namespace ambiguity
+use Formation\Http\Controllers\ApiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,13 +36,14 @@ Route::post('/sanctum/token', function (Request $request) {
     return $user->createToken($request->device_name)->plainTextToken;
 });
 
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
     
-    Route::apiResource('/{moduleSection}/{moduleGroup}/{modules}', \Formation\Http\Controllers\ApiController::class)->only(['index', 'store']);
-    Route::get('/{moduleSection}/{moduleGroup}/{modules}/{id}', [\Formation\Http\Controllers\ApiController::class, 'show']);
-    Route::put('/{moduleSection}/{moduleGroup}/{modules}/{id}', [\Formation\Http\Controllers\ApiController::class, 'update']);
-    Route::delete('/{moduleSection}/{moduleGroup}/{modules}/{id}', [\Formation\Http\Controllers\ApiController::class, 'destroy']);
+    Route::apiResource('/{moduleSection}/{moduleGroup}/{modules}', ApiController::class)->only(['index', 'store']);
+    Route::get('/{moduleSection}/{moduleGroup}/{modules}/{id}', [ApiController::class, 'show']);
+    Route::put('/{moduleSection}/{moduleGroup}/{modules}/{id}', [ApiController::class, 'update']);
+    Route::delete('/{moduleSection}/{moduleGroup}/{modules}/{id}', [ApiController::class, 'destroy']);
 });

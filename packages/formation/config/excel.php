@@ -356,7 +356,7 @@ return [
         | in conjunction with queued imports and exports.
         |
         */
-        'remote_disk'         => 's3',
+        'remote_disk'         => env('APP_ENV', 'production') === 'local' || env('APP_ENV', 'production') === 'testing' ? null : 's3',
         'remote_prefix'       => 'framework/cache/laravel-excel',
 
         /*

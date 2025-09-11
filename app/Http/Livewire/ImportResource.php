@@ -112,7 +112,8 @@ class ImportResource extends Component
         $this->editing->offsetUnset('attachment');
 
         $filename = $file->getClientOriginalName();
-        $path = $file->storePubliclyAs('/imports', $filename, 's3');
+        $disk = app()->environment('local', 'testing') ? 'local' : 's3';
+        $path = $file->storePubliclyAs('/imports', $filename, $disk);
 
         $import = $this->getModelProperty()::create([
             'model' => $this->getModuleModel(),
@@ -128,6 +129,9 @@ class ImportResource extends Component
             'updated_by' => Auth::id(),
         ]);
         
+        // Use appropriate disk based on environment
+        $disk = app()->environment('local', 'testing') ? 'local' : 's3';
+        
         Excel::import(new WithImport(
             $this->moduleSection, 
             $this->moduleGroup, 
@@ -137,7 +141,7 @@ class ImportResource extends Component
             $this->importType, 
             $this->getImportChunkSize(), 
             $import, 
-            Auth::user()), $path, 's3');
+            Auth::user()), $path, $disk);
 
         return $this->editing;
     }
