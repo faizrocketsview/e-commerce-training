@@ -10,6 +10,8 @@ class Order extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public const TABLE = 'orders';
+
     protected $fillable = [
         'user_id',
         'status',
@@ -31,16 +33,6 @@ class Order extends Model
 
     protected $attributes = [
         'deleted_token' => null,
-    ];
-
-    protected $casts = [
-        'subtotal' => 'decimal:2',
-        'tax' => 'decimal:2',
-        'shipping' => 'decimal:2',
-        'discount' => 'decimal:2',
-        'total' => 'decimal:2',
-        'total_price' => 'decimal:2',
-        'placed_at' => 'datetime',
     ];
 
     protected static function boot()

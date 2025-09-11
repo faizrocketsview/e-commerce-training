@@ -3,72 +3,48 @@
 namespace App\Actions\Order;
 
 use App\Models\Order;
-use App\Models\OrderItem;
-use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
 
 class EcommerceManagementsOrderSaveAction
 {
     /**
-     * Execute the save action for orders
+     * Execute the save action for orders using an object-oriented approach.
      *
-     * @param object $data The order data
-     * @param string $type The action type (create or edit)
+     * @param object $object The order data object (Formation editing object)
+     * @param string|null $actionType Ignored (kept for compatibility with caller)
      * @return int The order ID
      */
-    public function execute($data, $type = 'create')
+    public function execute($object, $actionType = null)
     {
-        // Set audit fields
-        if ($type === 'create') {
-            $data->created_by = Auth::id();
+        // Audit
+        if (empty($object->id)) {
+            $object->created_by = Auth::id();
         }
-        $data->updated_by = Auth::id();
+        $object->updated_by = Auth::id();
 
-        // Set default values if not provided
-        if (empty($data->currency)) {
-            $data->currency = 'MYR';
-        }
+        // Defaults via null-coalescing (respects 0 values and non-empty strings)
+        $object->currency = $object->currency ?? 'MYR';
+        $object->subtotal = $object->subtotal ?? 0;
+        $object->tax = $object->tax ?? 0;
+        $object->shipping = $object->shipping ?? 0;
+        $object->discount = $object->discount ?? 0;
+        $object->total = $object->total ?? 0;
+        $object->total_price = $object->total_price ?? $object->total;
+        $object->placed_at = $object->placed_at ?? now();
 
-        if (empty($data->subtotal)) {
-            $data->subtotal = 0;
-        }
-
-        if (empty($data->tax)) {
-            $data->tax = 0;
-        }
-
-        if (empty($data->shipping)) {
-            $data->shipping = 0;
+        // Remove sub-relations handled elsewhere
+        if (isset($object->orderItems)) {
+            unset($object->orderItems);
         }
 
-        if (empty($data->discount)) {
-            $data->discount = 0;
+        // Persist as Eloquent object (aligns with default SaveAction semantics)
+        $order = empty($object->id) ? new Order() : Order::findOrFail($object->id);
+
+        foreach (get_object_vars($object) as $attribute => $value) {
+            $order->{$attribute} = $value;
         }
 
-        if (empty($data->total)) {
-            $data->total = 0;
-        }
-
-        if (empty($data->total_price)) {
-            $data->total_price = $data->total;
-        }
-
-        if (empty($data->placed_at)) {
-            $data->placed_at = now();
-        }
-
-        // Convert to array for mass assignment
-        $orderData = $data->toArray();
-        
-        // Remove order items from the data as they're handled separately
-        unset($orderData['orderItems']);
-
-        if ($type === 'create') {
-            $order = Order::create($orderData);
-        } else {
-            $order = Order::findOrFail($data->id);
-            $order->update($orderData);
-        }
+        $order->save();
 
         return $order->id;
     }

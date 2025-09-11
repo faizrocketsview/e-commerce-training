@@ -29,5 +29,6 @@ return [
     'module_description' => '',
     'product_name' => 'Product Name',
     'sku' => 'SKU',
-    
+    'attachments' => 'Attachments',
+    "" => '',
 ];

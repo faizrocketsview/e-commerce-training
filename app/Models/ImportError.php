@@ -10,6 +10,8 @@ class ImportError extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public const TABLE = 'import_errors';
+
     protected $guarded = ['id'];  
 
     protected $attributes = [

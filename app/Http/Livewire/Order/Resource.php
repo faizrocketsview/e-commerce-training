@@ -8,6 +8,9 @@ use Illuminate\Support\Str;
 
 class Resource extends BaseResource
 {
+    // Eloquent model for this resource
+    protected $model = \App\Models\Order::class;
+
     // Holds dynamic subfieldBox items (e.g., orderItems)
     public $subClassItems = [];
     // Holds existing subfield records when editing/showing

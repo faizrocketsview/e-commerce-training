@@ -10,6 +10,8 @@ class OrderItem extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public const TABLE = 'order_items';
+
     protected $fillable = [
         'order_id',
         'product_id',
@@ -27,12 +29,6 @@ class OrderItem extends Model
 
     protected $attributes = [
         'deleted_token' => null,
-    ];
-
-    protected $casts = [
-        'unit_price' => 'decimal:2',
-        'line_total' => 'decimal:2',
-        'price' => 'decimal:2',
     ];
 
     protected static function boot()

@@ -11,6 +11,8 @@ class Product extends Model
 {
     use HasFactory, SoftDeletes, WithTranslation;
 
+    public const TABLE = 'products';
+
     protected $fillable = [
         'category_id',
         'name',
@@ -34,11 +36,6 @@ class Product extends Model
 
     protected $attributes = [
         'deleted_token' => null,
-    ];
-
-    protected $casts = [
-        'price' => 'decimal:2',
-        'is_active' => 'boolean',
     ];
 
     protected static function boot()

@@ -11,6 +11,8 @@ class ProductCategory extends Model
 {
     use HasFactory, SoftDeletes, WithTranslation;
 
+    public const TABLE = 'product_categories';
+
     protected $fillable = [
         'name',
         'type',

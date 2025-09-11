@@ -11,6 +11,8 @@ class Role extends Model
     use HasFactory;
     use SoftDeletes;
 
+    public const TABLE = 'roles';
+
     /**
      * The model's default values for attributes.
      *

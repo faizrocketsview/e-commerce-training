@@ -178,7 +178,7 @@ class OrderFormation
             // Order Items Section
             $card->create('Order Items')->column(1)->group(function (Section $section) use ($object) {
                 $section->create('')->span(1)->column(1)->group(function (Column $column) use ($object) {
-                    $column->subfieldBox('orderItems')->with('orderItems')->span(1)->group(function (Field $field) {
+                    $column->subfieldBox('')->with('orderItems')->span(1)->group(function (Field $field) {
                         $field->select('product_id')->span(2)->group(function (Field $subField) {
                             $subField->option('', 'Select Product');
                             foreach(\App\Models\Product::where('status', 'active')->get() as $product) {

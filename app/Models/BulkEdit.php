@@ -10,6 +10,8 @@ class BulkEdit extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public const TABLE = 'bulk_edits';
+
     protected $guarded = ['id'];  
 
     protected $attributes = [

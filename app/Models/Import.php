@@ -10,6 +10,8 @@ class Import extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public const TABLE = 'imports';
+
     protected $guarded = ['id'];  
 
     protected $attributes = [

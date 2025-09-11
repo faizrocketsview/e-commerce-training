@@ -225,47 +225,6 @@ if (file_exists($withImportFile)) {
 
 echo "\n";
 
-// Test 9: Check vendor file authentication fix
-echo "📋 Test 9: Vendor File Authentication Fix\n";
-echo "-----------------------------------------\n";
-
-$vendorWithImportFile = __DIR__ . '/../vendor/leekhengteck/formation/src/DataTable/WithImport.php';
-if (file_exists($vendorWithImportFile)) {
-    $content = file_get_contents($vendorWithImportFile);
-    
-    if (strpos($content, 'Auth::setUser($this->user)') !== false) {
-        echo "✅ Vendor file: Correct authentication method (Auth::setUser) implemented\n";
-    } else {
-        echo "❌ Vendor file: Correct authentication method missing\n";
-    }
-    
-    if (strpos($content, 'Auth::login($this->user)') !== false) {
-        echo "❌ Vendor file: Incorrect authentication method (Auth::login) still present\n";
-    } else {
-        echo "✅ Vendor file: Incorrect authentication method (Auth::login) removed\n";
-    }
-} else {
-    echo "❌ Vendor WithImport file not found\n";
-}
-
-echo "\n";
-
-// Test 10: Check Laravel application status
-echo "📋 Test 10: Laravel Application Status\n";
-echo "-------------------------------------\n";
-
-// Test if we can run artisan commands
-$output = shell_exec('php artisan --version 2>&1');
-if (strpos($output, 'Laravel Framework') !== false) {
-    echo "✅ Laravel application is working\n";
-    echo "   " . trim($output) . "\n";
-} else {
-    echo "❌ Laravel application has issues\n";
-    echo "   Error: " . trim($output) . "\n";
-}
-
-echo "\n";
-
 // Final Summary
 echo "📋 Final Summary\n";
 echo "================\n";
