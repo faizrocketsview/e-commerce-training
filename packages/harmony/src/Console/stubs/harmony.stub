@@ -1,0 +1,68 @@
+<?php
+
+namespace {{ namespace }};
+
+use Harmony\Collection;
+use Harmony\Connector;
+use Harmony\Harmony;
+use Harmony\Collection\Body;
+use Harmony\Collection\Query;
+use Harmony\Collection\Request;
+use Harmony\Connector\Authorization;
+use Harmony\Connector\Header;
+
+class {{ class }}
+{
+    public static $baseUrl = 'http://harmony.test/';
+    public static $token = 'BQDVunfMCl0H3VVsEd_nkwyJnpUeQ0';
+    // public static $username;
+    // public static $password;
+
+    public static function connector(): Connector
+    {
+        return Harmony::createConnector(function (Connector $connector) {
+            $connector
+            ->authorization(function (Authorization $authorization) {
+                $authorization->type('bearer'); //none, bearer, basic
+            })
+            ->header(function (Header $header){
+                $header->type('Content-Type', 'application/json');
+                $header->type('Accept', 'application/json');
+            });
+        });
+    }
+
+    public function index(): Collection
+    {
+        return Harmony::createCollection(function (Collection $collection) {
+            $collection->group(function (Request $request) {
+                $request->endpoint('api/articles');
+                $request->method('GET');
+
+                $request->query(function (Query $query){
+                    $query->field('title');
+                    $query->field('keywords');
+                });
+            });
+        });
+    }
+
+    public function update(Article $article): Collection
+    {
+        return Harmony::createCollection(function (Collection $collection) use ($article) {
+            $collection->group(function (Request $request) use ($article) {
+                $request->endpoint('api/articles'.$article->id);
+                $request->method('PUT');
+
+                $request->body(function (Body $body) {
+                    $body->group('data', function (Body $body) {
+                        $body->group('attributes', function (Body $body) {
+                            $body->field('title');
+                            $body->field('keywords');
+                        });
+                    });
+                });
+            });
+        });
+    }
+}

@@ -4,8 +4,44 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "03938348fcbace5ca227b93edc5e772c",
+    "content-hash": "94c91506340f68906dd2851f1cd8f5ea",
     "packages": [
+        {
+            "name": "aisyahhanifiahrv/harmony",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "packages/harmony",
+                "reference": "c8f3edc221015b59b1724d8b6f6e6fc839e23f4f"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Harmony\\HarmonyServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Harmony\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "aisyahhanifiah",
+                    "email": "aisyahhanifiahrv@rocketsiew.com"
+                }
+            ],
+            "description": "A Laravel API package for managing 3rd party API configuration",
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
         {
             "name": "aws/aws-crt-php",
             "version": "v1.2.7",
@@ -9987,6 +10023,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
+        "aisyahhanifiahrv/harmony": 20,
         "leekhengteck/formation": 20
     },
     "prefer-stable": true,

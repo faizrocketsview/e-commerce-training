@@ -1,0 +1,27 @@
+{
+    "name": "aisyahhanifiahrv/harmony",
+    "description": "A Laravel API package for managing 3rd party API configuration",
+    "type": "library",
+    "require": {
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Harmony\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "aisyahhanifiah",
+            "email": "aisyahhanifiahrv@rocketsiew.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Harmony\\HarmonyServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable"
+}
