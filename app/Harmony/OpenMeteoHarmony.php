@@ -32,7 +32,7 @@ class OpenMeteoHarmony
         return Harmony::createConnector(function (Connector $connector) {
             $connector
             ->authorization(function (Authorization $authorization) {
-                $authorization->type('none'); // Open-Meteo doesn't require authentication
+                $authorization->type('none'); 
             })
             ->header(function (Header $header){
                 $header->type('Content-Type', 'application/json');

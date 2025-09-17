@@ -96,6 +96,16 @@ class ProductFormation
                     $export->field('status');
                     $export->field('created_at');
                 })
+                ->bulkEdit(function ($bulkEdit) {
+                    // Configure bulk edit fields so the view has items to render
+                    $bulkEdit->chunkSize(350);
+                    $bulkEdit->field('name');
+                    $bulkEdit->field('sku');
+                    $bulkEdit->field('price');
+                    $bulkEdit->field('stock');
+                    $bulkEdit->field('description');
+                    $bulkEdit->field('status');
+                })
                 ->search(function (Search $search) {
                     $search->field('name')->json();
                     $search->field('sku');
@@ -121,6 +131,7 @@ class ProductFormation
                     $action->operation('export');
                     $action->operation('import');
                     $action->operation('bulkDelete')->danger();
+                    $action->operation('bulkEdit');
                 })
                 ->itemAction(function (ItemAction $itemAction) {
                     $itemAction->operation('show')->rowClickable();
